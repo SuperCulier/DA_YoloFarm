@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 import requests
 from datetime import datetime
 from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
@@ -57,17 +58,23 @@ def update_environment_data():
     """Lấy và lưu dữ liệu vào MongoDB"""
     results = []
     for feed in FEED_KEYS:
-
-        print(f"✅ loi o day, /////// ")
-
-        data = fetch_data(feed)
-
+        data = fetch_data(feed)  # Lấy dữ liệu từ Adafruit IO
         print(f"✅ Fetch data for {feed}: {data}")  # Debug dữ liệu lấy về
 
         if data:
-            insert_one(COLLECTION_NAME, data)
-            results.append(data)
-            print(f"✅ Dữ liệu đã được lưu vào MongoDB: {data}")
+            data_copy = data.copy()  # Tạo bản sao trước khi lưu
+            insert_one(COLLECTION_NAME, data_copy)  # Lưu vào MongoDB
+            results.append(data)  # Thêm bản gốc vào danh sách kết quả
+            print(f"✅ Dữ liệu đã được lưu vào MongoDB: {data_copy}")
         else:
             print(f"❌ Không có dữ liệu để lưu cho {feed}")
-    return results
+
+    # Chuyển _id thành chuỗi nếu có
+    for item in results:
+        if "_id" in item:
+            item["_id"] = str(item["_id"])  # Chuyển ObjectId thành chuỗi
+
+    print("✅ Dữ liệu trước khi trả về:", results)  # Debug dữ liệu
+
+    return jsonable_encoder(results)
+
