@@ -104,5 +104,5 @@ export default function ChartComponent() {
       id="line-chart"
       className="w-full h-full border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
     ></div>
-  ); 
+  ); // Thêm div để hiển thị biểu đồ
 }
