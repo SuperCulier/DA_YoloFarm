@@ -1,5 +1,4 @@
-from fastapi.encoders import jsonable_encoder
-import requests
+import requests 
 from datetime import datetime
 from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
 from src.config.database import insert_one
