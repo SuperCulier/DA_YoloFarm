@@ -1,0 +1,14 @@
+# Bỏ qua file môi trường
+.env
+
+# Bỏ qua file cấu hình cá nhân
+be/src/config/settings.py
+
+# Bỏ qua thư mục cache của Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ qua thư mục node_modules (frontend)
+frontend/node_modules/
