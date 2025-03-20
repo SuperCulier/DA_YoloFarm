@@ -99,7 +99,6 @@ export default function Weather() {
             />
           ))}
         </div>
-
         {/* Biểu đồ - thu hẹp và căn giữa */}
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-0">
           <div className="w-full h-[400px]">
