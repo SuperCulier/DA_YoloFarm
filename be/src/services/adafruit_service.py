@@ -5,7 +5,7 @@ from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
 from src.config.database import insert_one
 
 # Danh sách các feed cần lấy dữ liệu
-FEED_KEYS = ["temperature", "humidity", "lux"]
+FEED_KEYS = ["temperature", "humidity", "lux", "soil-moisture"]
 COLLECTION_NAME = "environment_data"
 
 def fetch_data(feed_key):
