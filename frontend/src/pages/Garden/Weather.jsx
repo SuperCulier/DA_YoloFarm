@@ -37,20 +37,60 @@ export default function Weather() {
   const [selectedTab, setSelectedTab] = useState("Ngày");
 
   const [weatherData, setWeatherData] = useState([
-    { title: "Nhiệt độ", icon: faTemperatureHalf, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Độ ẩm không khí", icon: faWind, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Độ ẩm đất", icon: faSeedling, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Lux", icon: faLightbulb, value: "Đang tải...", updatedAt: "--:--" },
+    {
+      title: "Nhiệt độ",
+      icon: faTemperatureHalf,
+      value: "Đang tải...",
+      updatedAt: "--:--",
+    },
+    {
+      title: "Độ ẩm không khí",
+      icon: faWind,
+      value: "Đang tải...",
+      updatedAt: "--:--",
+    },
+    {
+      title: "Độ ẩm đất",
+      icon: faSeedling,
+      value: "Đang tải...",
+      updatedAt: "--:--",
+    },
+    {
+      title: "Lux",
+      icon: faLightbulb,
+      value: "Đang tải...",
+      updatedAt: "--:--",
+    },
   ]);
 
   const updateWeatherData = async () => {
     const newData = await fetchLatestWeatherData();
     if (newData) {
       setWeatherData([
-        { title: "Nhiệt độ", icon: faTemperatureHalf, value: `${newData.temperature.value}°C`, updatedAt: newData.temperature.timestamp },
-        { title: "Độ ẩm không khí", icon: faWind, value: `${newData.humidity.value}%`, updatedAt: newData.humidity.timestamp },
-        { title: "Độ ẩm đất", icon: faSeedling, value: `${newData.soilMoisture.value}%`, updatedAt: newData.soilMoisture.timestamp },
-        { title: "Ánh sáng", icon: faLightbulb, value: `${newData.lux.value} lux`, updatedAt: newData.lux.timestamp },
+        {
+          title: "Nhiệt độ",
+          icon: faTemperatureHalf,
+          value: `${newData.temperature.value}°C`,
+          updatedAt: newData.temperature.timestamp,
+        },
+        {
+          title: "Độ ẩm không khí",
+          icon: faWind,
+          value: `${newData.humidity.value}%`,
+          updatedAt: newData.humidity.timestamp,
+        },
+        {
+          title: "Độ ẩm đất",
+          icon: faSeedling,
+          value: `${newData.soilMoisture.value}%`,
+          updatedAt: newData.soilMoisture.timestamp,
+        },
+        {
+          title: "Lux",
+          icon: faLightbulb,
+          value: `${newData.lux.value} lux`,
+          updatedAt: newData.lux.timestamp,
+        },
       ]);
     }
   };
