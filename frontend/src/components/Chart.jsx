@@ -60,6 +60,19 @@ export default function ChartComponent() {
           ],
           color: "#2ECC71",
         },
+        {
+          name: "Ánh sáng (Lux)",
+          data: [
+            [new Date().setHours(0, 0, 0, 0), 15],
+            [new Date().setHours(3, 0, 0, 0), 17],
+            [new Date().setHours(6, 0, 0, 0), 23],
+            [new Date().setHours(9, 0, 0, 0), 22],
+            [new Date().setHours(12, 0, 0, 0), 22],
+            [new Date().setHours(15, 0, 0, 0), 25],
+            [new Date().setHours(18, 0, 0, 0), 21],
+          ],
+          color: "#FFFF00",
+        },
       ],
       legend: { show: true, position: "top" },
       xaxis: {

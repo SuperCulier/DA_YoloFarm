@@ -6,6 +6,7 @@ export const fetchLatestWeatherData = async () => {
     if (!response.ok) {
       throw new Error("Failed to fetch weather data");
     }
+    console.log("aaaa")
     const data = await response.json();
     return {
       temperature: {

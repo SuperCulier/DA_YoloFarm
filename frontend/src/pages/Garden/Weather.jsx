@@ -50,7 +50,7 @@ export default function Weather() {
         { title: "Nhiệt độ", icon: faTemperatureHalf, value: `${newData.temperature.value}°C`, updatedAt: newData.temperature.timestamp },
         { title: "Độ ẩm không khí", icon: faWind, value: `${newData.humidity.value}%`, updatedAt: newData.humidity.timestamp },
         { title: "Độ ẩm đất", icon: faSeedling, value: `${newData.soilMoisture.value}%`, updatedAt: newData.soilMoisture.timestamp },
-        { title: "Lux", icon: faLightbulb, value: `${newData.lux.value} lux`, updatedAt: newData.lux.timestamp },
+        { title: "Ánh sáng", icon: faLightbulb, value: `${newData.lux.value} lux`, updatedAt: newData.lux.timestamp },
       ]);
     }
   };
@@ -83,7 +83,10 @@ export default function Weather() {
           </ul>
         </div>
         {/* Nút cập nhật dữ liệu */}
-        <button className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300" onClick={updateWeatherData}>
+        <button
+          className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+          onClick={updateWeatherData}
+        >
           <FontAwesomeIcon icon={faRotateRight} />
         </button>
 

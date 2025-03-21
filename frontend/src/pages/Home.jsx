@@ -14,8 +14,7 @@ export default function Home() {
             <span className="text-green-600">công nghệ AI</span>
           </h1>
           <p className="text-lg text-gray-600 mt-4">
-            Hệ thống Smart Garden giúp bạn tự động hóa việc tưới tiêu, giám sát
-            độ ẩm, ánh sáng và dinh dưỡng của cây trồng theo thời gian thực.
+            Hệ thống Smart Garden giúp những người bận rộn chăm sóc khu vườn của mình.
           </p>
           <button className="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg shadow-md">
             Bắt đầu ngay
