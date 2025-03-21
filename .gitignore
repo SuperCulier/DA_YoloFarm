@@ -1,7 +1,6 @@
 # Bỏ qua file môi trường
 be/.env
 .env
-
 # Bỏ qua file cấu hình cá nhân
 be/src/config/settings.py
 
