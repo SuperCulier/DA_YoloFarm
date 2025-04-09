@@ -1,4 +1,4 @@
-from src.config.database import db
+from src.config.database import *
 from src.models.environment import EnvironmentData
 
 COLLECTION_NAME = "environment_data"
@@ -20,3 +20,16 @@ def get_latest_environment_data(region: str):
     )
     return latest_data if latest_data else {"message": "Không tìm thấy dữ liệu"}
 
+def get_hourly_data(region: str, date):
+    """Lấy thông số môi trường của một khu vực theo từng giờ"""
+    HOURLY_COLLECTION = date.strftime("%d%m%Y")
+    create_hourlyDataOnRegion(
+            source_collection=COLLECTION_NAME,
+            new_collection=HOURLY_COLLECTION,
+            date=date
+            )
+
+    hourly_data = list(db[HOURLY_COLLECTION].find({"_id": region}, {"_id": 0}))
+
+    return hourly_data if hourly_data else {"message": "Không tìm thấy dữ liệu"}
+    
