@@ -52,7 +52,8 @@ def get_history_environment_data(start_day, end_day):
                 "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$ts"}},
                 "temperature": {"$avg": "$temperature"},
                 "humidity": {"$avg": "$humidity"},
-                "lux": {"$avg": "$lux"}
+                "lux": {"$avg": "$lux"},
+                "soil_moisture": {"$avg": "$soil_moisture"}
             }
         },
         {
@@ -61,6 +62,7 @@ def get_history_environment_data(start_day, end_day):
             "temperature": 1,
             "humidity": 1,
             "lux": 1,
+            "soil_moisture": 1,
             "_id": 0  
             }
         },
@@ -74,7 +76,8 @@ def get_history_environment_data(start_day, end_day):
         item["date"]: {
             "temperature": item["temperature"],
             "humidity": item["humidity"],
-            "lux": item["lux"]
+            "lux": item["lux"],
+            "soil_moisture": item["soil_moisture"]
         } for item in result
     }
     return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
@@ -113,7 +116,8 @@ def get_hourly_environment_data(date):
                 "_id": { "$hour": "$ts" },
                 "temperature": { "$avg": "$temperature" },
                 "humidity": { "$avg": "$humidity" },
-                "lux": { "$avg": "$lux" }
+                "lux": { "$avg": "$lux" },
+                "soil_moisture": {"$avg": "$soil_moisture"}
             }
         },
         {
@@ -122,6 +126,7 @@ def get_hourly_environment_data(date):
             "temperature": 1,
             "humidity": 1,
             "lux": 1,
+            "soil_moisture": 1,
             "_id": 0  
             }
         },
@@ -136,7 +141,8 @@ def get_hourly_environment_data(date):
         str(item["hour"]): {
             "temperature": item["temperature"],
             "humidity": item["humidity"],
-            "lux": item["lux"]
+            "lux": item["lux"],
+            "soil_moisture": item["soil_moisture"]
         } for item in result
     }
     return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
