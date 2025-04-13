@@ -1,5 +1,7 @@
 from src.config.database import *
 from src.models.environment import EnvironmentData
+from fastapi.encoders import jsonable_encoder
+from datetime import datetime, timezone
 
 COLLECTION_NAME = "environment_data"
 
@@ -20,16 +22,123 @@ def get_latest_environment_data(region: str):
     )
     return latest_data if latest_data else {"message": "Không tìm thấy dữ liệu"}
 
-def get_hourly_data(region: str, date):
+def get_history_environment_data(start_day, end_day):
+    """Lấy toàn bộ dữ liệu trong khoảng thời gian từ start_day đến end_day"""
+    print(f"startDay: {start_day} - type: {type(start_day)}, now: {end_day} - type: {type(end_day)}")
+    pipeline = [
+        {
+            "$addFields": {
+                "ts": {
+                    "$cond": [
+                        { "$eq": [ { "$type": "$timestamp" }, "string" ] },
+                        { "$toDate": "$timestamp" },
+                        "$timestamp"
+                    ]
+                }
+            }
+        },
+        {
+            "$match": {
+                "ts": {
+                    # "$gte": start_day.isoformat(),
+                    # "$lte": end_day.isoformat()
+                    "$gte": start_day,
+                    "$lte": end_day
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$ts"}},
+                "temperature": {"$avg": "$temperature"},
+                "humidity": {"$avg": "$humidity"},
+                "lux": {"$avg": "$lux"}
+            }
+        },
+        {
+        "$project": {
+            "date": "$_id",
+            "temperature": 1,
+            "humidity": 1,
+            "lux": 1,
+            "_id": 0  
+            }
+        },
+        {
+            "$sort": {"date": 1}
+        }
+    ]
+    result = list(db[COLLECTION_NAME].aggregate(pipeline))
+    print(f"result la: {result}")
+    result_dict = {
+        item["date"]: {
+            "temperature": item["temperature"],
+            "humidity": item["humidity"],
+            "lux": item["lux"]
+        } for item in result
+    }
+    return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
+
+def get_hourly_environment_data(date):
     """Lấy thông số môi trường của một khu vực theo từng giờ"""
-    HOURLY_COLLECTION = date.strftime("%d%m%Y")
-    create_hourlyDataOnRegion(
-            source_collection=COLLECTION_NAME,
-            new_collection=HOURLY_COLLECTION,
-            date=date
-            )
+    if date is None:
+        now = datetime.now(timezone.utc)
+    else:
+        now = date.replace(hour=23, minute=59, second=59, microsecond=0)
+    print(f"now TIME: {now} - type: {type(now)}")
+    startDay = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    print(f"START TIME: {startDay} - type: {type(startDay)}")
+    pipeline = [
+        {
+            "$addFields": {
+                "ts": {
+                    "$cond": [
+                        { "$eq": [ { "$type": "$timestamp" }, "string" ] },
+                        { "$toDate": "$timestamp" },
+                        "$timestamp"
+                    ]
+                }
+            }
+        },
+        {
+            "$match": {
+                "ts": {
+                    "$gte": startDay,
+                    "$lt": now
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": { "$hour": "$ts" },
+                "temperature": { "$avg": "$temperature" },
+                "humidity": { "$avg": "$humidity" },
+                "lux": { "$avg": "$lux" }
+            }
+        },
+        {
+        "$project": {
+            "hour": "$_id",
+            "temperature": 1,
+            "humidity": 1,
+            "lux": 1,
+            "_id": 0  
+            }
+        },
+        {
+            "$sort": {"hour": 1}
+        }
+    ]
 
-    hourly_data = list(db[HOURLY_COLLECTION].find({"_id": region}, {"_id": 0}))
+    result = list(db[COLLECTION_NAME].aggregate(pipeline))
+    print(f"result la: {result}")
+    result_dict = {
+        str(item["hour"]): {
+            "temperature": item["temperature"],
+            "humidity": item["humidity"],
+            "lux": item["lux"]
+        } for item in result
+    }
+    return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
 
-    return hourly_data if hourly_data else {"message": "Không tìm thấy dữ liệu"}
     
