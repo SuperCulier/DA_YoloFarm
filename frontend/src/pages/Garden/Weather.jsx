@@ -49,7 +49,7 @@ export default function Weather() {
       setWeatherData([
         { title: "Nhiệt độ", icon: faTemperatureHalf, value: `${newData.temperature.value}°C`, updatedAt: newData.temperature.timestamp },
         { title: "Độ ẩm không khí", icon: faWind, value: `${newData.humidity.value}%`, updatedAt: newData.humidity.timestamp },
-        { title: "Độ ẩm đất", icon: faSeedling, value: `${newData.soilMoisture.value}%`, updatedAt: newData.soilMoisture.timestamp },
+        { title: "Độ ẩm đất", icon: faSeedling, value: `${newData.soil-moisture.value}%`, updatedAt: newData.soilMoisture.timestamp },
         { title: "Lux", icon: faLightbulb, value: `${newData.lux.value} lux`, updatedAt: newData.lux.timestamp },
       ]);
     }

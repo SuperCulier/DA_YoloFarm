@@ -21,8 +21,8 @@ export const fetchLatestWeatherData = async () => {
         timestamp: data.lux.timestamp,
       },
       soilMoisture: {
-        value: data.soil_moisture.value,
-        timestamp: data.soil_moisture.timestamp,
+        value: data.soil-moisture.value,
+        timestamp: data.soil-moisture.timestamp,
       },
     };
   } catch (error) {
