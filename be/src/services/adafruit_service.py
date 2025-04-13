@@ -37,8 +37,8 @@ def fetch_data(feed_key):
             }
     return None
 
+"""
 def show_value():
-    """Trả về bộ thông số đo được mới nhất từ Adafruit IO."""
     latest_data = {}
 
     for feed in FEED_KEYS:
@@ -53,9 +53,38 @@ def show_value():
         else:
             latest_data[feed] = {"error": "Không có dữ liệu"}
     return latest_data
+"""
+    
+def show_value():
+    """Trả về dữ liệu JSON gồm 1 timestamp duy nhất và các thông số đo được từ Adafruit IO."""
+    result = {}
+    latest_timestamp = None
 
+    for feed in FEED_KEYS:
+        data = fetch_data(feed)
+        # Chuyển key từ dạng 'soil-moisture' → 'soil_moisture'
+        key = feed.replace("-", "_")
+
+        if data:
+            # Lưu giá trị đo được
+            result[key] = data["value"]
+            # Chọn timestamp mới nhất làm chuẩn
+            if not latest_timestamp or data["timestamp"] > latest_timestamp:
+                latest_timestamp = data["timestamp"]
+        else:
+            result[key] = None  # gán giá trị mặc định
+
+    # Ghi timestamp cuối vào JSON trả về
+    if latest_timestamp:
+        result["timestamp"] = latest_timestamp.isoformat()
+    else:
+        result["timestamp"] = None
+
+    return result
+
+
+"""
 def update_environment_data():
-    """Lấy và lưu dữ liệu vào MongoDB"""
     results = []
     for feed in FEED_KEYS:
         data = fetch_data(feed)  # Lấy dữ liệu từ Adafruit IO
@@ -77,4 +106,16 @@ def update_environment_data():
     print("✅ Dữ liệu trước khi trả về:", results)  # Debug dữ liệu
 
     return jsonable_encoder(results)
+"""
 
+def update_environment_data():
+    """Lấy và lưu dữ liệu vào MongoDB"""
+    data = show_value()  # Lấy dữ liệu từ Adafruit IO
+    if data:
+        data_copy = data.copy()  # Tạo bản sao trước khi lưu
+        insert_one(COLLECTION_NAME, data_copy)  # Lưu vào MongoDB
+        print(f"✅ Dữ liệu đã được lưu vào MongoDB: {data_copy}")
+    else:
+        print(f"❌ Không có dữ liệu để lưu cho")
+    print("✅ Dữ liệu trước khi trả về:", data)  # Debug dữ liệu
+    return jsonable_encoder(data)
