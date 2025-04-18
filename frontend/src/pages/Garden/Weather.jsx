@@ -1,65 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SideBar from "../../components/SideBar.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faSeedling,
   faTemperatureHalf,
   faWind,
   faLightbulb,
+  faSeedling,
   faRotateRight,
+  faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import Chart from "../../components/Chart.jsx";
-import { fetchLatestWeatherData } from "../../apis/apis.js";
+import { fetchLatestWeatherData } from "../../apis/WeatherAPI.js";
 
-// Component WeatherCard
-const WeatherCard = ({ title, icon, value, updatedAt }) => {
+// Combined Weather Card Component
+const CombinedWeatherCard = ({ data }) => {
   return (
-    <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="flex justify-between items-center mb-2">
-        <h5 className="text-xl font-regular tracking-tight text-gray-900 dark:text-white">
-          <FontAwesomeIcon
-            icon={icon}
-            className="mr-2 text-blue-500"
-            size="lg"
-          />
-          {title}
-        </h5>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{updatedAt}</p>
+    <div className="max-w-md mx-auto p-6 bg-white border border-gray-200 rounded-xl shadow-md text-gray-800 dark:bg-gray-900 dark:text-white">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-5xl font-bold">
+          <FontAwesomeIcon icon={faTemperatureHalf} className="mr-2 text-red-500" />
+          {data.temperature}°
+        </div>
+        <div className="text-right text-sm text-gray-500 dark:text-gray-300">
+          <div className="flex items-center gap-1">
+            <FontAwesomeIcon icon={faLocationDot} />
+            <span>Vườn nhà</span>
+          </div>
+          <div>Cập nhật lúc {data.timestamp}</div>
+        </div>
       </div>
-      <p className="text-2xl text-center font-bold text-gray-900 dark:text-white">
-        {value}
-      </p>
+
+      <div className="grid grid-cols-3 gap-4 text-center border-t pt-4">
+        <div>
+          <FontAwesomeIcon icon={faWind} className="text-blue-500 text-lg" />
+          <div className="text-sm">Độ ẩm</div>
+          <div className="font-semibold">{data.humidity}%</div>
+        </div>
+        <div>
+          <FontAwesomeIcon icon={faSeedling} className="text-green-600 text-lg" />
+          <div className="text-sm">Độ ẩm đất</div>
+          <div className="font-semibold">{data.soilMoisture}%</div>
+        </div>
+        <div>
+          <FontAwesomeIcon icon={faLightbulb} className="text-yellow-500 text-lg" />
+          <div className="text-sm">Ánh sáng</div>
+          <div className="font-semibold">{data.lux} lux</div>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default function Weather() {
   const [selectedTab, setSelectedTab] = useState("Ngày");
-
-  const [weatherData, setWeatherData] = useState([
-    { title: "Nhiệt độ", icon: faTemperatureHalf, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Độ ẩm không khí", icon: faWind, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Độ ẩm đất", icon: faSeedling, value: "Đang tải...", updatedAt: "--:--" },
-    { title: "Lux", icon: faLightbulb, value: "Đang tải...", updatedAt: "--:--" },
-  ]);
+  const [weatherData, setWeatherData] = useState(null);
 
   const updateWeatherData = async () => {
-    const newData = await fetchLatestWeatherData();
-    if (newData) {
-      setWeatherData([
-        { title: "Nhiệt độ", icon: faTemperatureHalf, value: `${newData.temperature.value}°C`, updatedAt: newData.temperature.timestamp },
-        { title: "Độ ẩm không khí", icon: faWind, value: `${newData.humidity.value}%`, updatedAt: newData.humidity.timestamp },
-        { title: "Độ ẩm đất", icon: faSeedling, value: `${newData.soil-moisture.value}%`, updatedAt: newData.soilMoisture.timestamp },
-        { title: "Lux", icon: faLightbulb, value: `${newData.lux.value} lux`, updatedAt: newData.lux.timestamp },
-      ]);
-    }
+    const data = await fetchLatestWeatherData();
+    if (data) {
+      setWeatherData({
+        temperature: data.temperature,
+        humidity: data.humidity,
+        soilMoisture: data.soilMoisture,
+        lux: data.lux,
+        timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      });
+    }    
   };
+
+  useEffect(() => {
+    updateWeatherData();
+  }, []);
 
   return (
     <>
       <SideBar />
       <div className="p-6 sm:ml-64 bg-gray-50 dark:bg-gray-900 min-h-screen">
-        {/* Tabs chọn thời gian */}
+        {/* Tabs */}
         <div className="text-sm font-medium text-center text-gray-500 dark:text-gray-400 mb-6">
           <ul className="flex flex-wrap justify-center -mb-px">
             {["Ngày", "Tuần", "Tháng"].map((label) => (
@@ -83,26 +103,21 @@ export default function Weather() {
           </ul>
         </div>
 
-        {/* Nút cập nhật dữ liệu */}
-        <button className="flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300" onClick={updateWeatherData}>
-          <FontAwesomeIcon icon={faRotateRight} />
-        </button>
-
-        {/* Weather cards - bố cục 2x2 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 max-w-4xl mx-auto">
-          {weatherData.map((data, index) => (
-            <WeatherCard
-              key={index}
-              title={data.title}
-              icon={data.icon}
-              value={data.value}
-              updatedAt={data.updatedAt}
-            />
-          ))}
+        {/* Update button */}
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={updateWeatherData}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+          >
+            <FontAwesomeIcon icon={faRotateRight} />
+          </button>
         </div>
 
-        {/* Biểu đồ - thu hẹp và căn giữa */}
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-0">
+        {/* Weather Card */}
+        {weatherData && <CombinedWeatherCard data={weatherData} />}
+
+        {/* Chart */}
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-0 mt-8">
           <div className="w-full h-[400px]">
             <Chart />
           </div>
