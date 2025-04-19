@@ -53,7 +53,13 @@ const CombinedWeatherCard = ({ data }) => {
 
 export default function Weather() {
   const [selectedTab, setSelectedTab] = useState("Ngày");
-  const [weatherData, setWeatherData] = useState(null);
+  const [weatherData, setWeatherData] = useState({
+    temperature: "--",
+    humidity: "--",
+    soilMoisture: "--",
+    lux: "--",
+    timestamp: "--:--",
+  });
 
   const updateWeatherData = async () => {
     const data = await fetchLatestWeatherData();
@@ -114,7 +120,7 @@ export default function Weather() {
         </div>
 
         {/* Weather Card */}
-        {weatherData && <CombinedWeatherCard data={weatherData} />}
+        <CombinedWeatherCard data={weatherData} />
 
         {/* Chart */}
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-0 mt-8">
@@ -126,3 +132,4 @@ export default function Weather() {
     </>
   );
 }
+
