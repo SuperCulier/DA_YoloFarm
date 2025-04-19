@@ -4,12 +4,13 @@ import { GET_WEATHER_DATA } from "../apis/apis"
 export const fetchLatestWeatherData = async () => {
   try {
     const response = await axios.get(GET_WEATHER_DATA);
-    if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
-    }
+    console.log(response)
+    // if (!response) {
+    //   throw new Error("Failed to fetch weather data");
+    // }
 
-    const data = await response.data;
-
+    const data = response.data;
+    
     return {
       temperature: data.temperature,
       humidity: data.humidity,
