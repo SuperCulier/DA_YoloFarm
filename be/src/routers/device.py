@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_fan_action, log_led_action, log_pump_action, get_device_logs
-from src.models.device import Device
+from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_device_action, get_device_logs, get_all_devices
+from src.models.device_model import Device, control_model, log_device
 
 """
 router = APIRouter(prefix="/device", tags=["Device"])
@@ -22,85 +22,39 @@ def remove_device(device_id: str):
  """
 
 router = APIRouter()
+feed = ["button-fan", "button-pump"]
+
 
 # API bat tat thiet bi
-# Quạt
-@router.post("/control/fan/on")
-def fan_on():
-    if control_device("button-fan", "1"):
-        log_fan_action("on")
-        return {"message": "Quạt đã bật"}
+@router.post("/device/control")
+def api_control_device(request: control_model):
+    id = request.id
+    value = request.value
+    # Chọn đúng feed_key
+    if id.startswith("f"):
+        feed_key = feed[0]
     else:
-        raise HTTPException(status_code=500, detail="Không thể bật quạt")
+        feed_key = feed[1]
 
-@router.post("/control/fan/off")
-def fan_off():
-    if control_device("button-fan", "0"):
-        log_fan_action("off")
-        return {"message": "Quạt đã tắt"}
+    # Điều khiển thiết bị
+    if control_device(feed_key, value):
+        action = "on" if value == 1 else "off"
+        log_device_action(id, action)
+        status = "bật" if value == 1 else "tắt"
+        return {"message": f"Đã {status} thiết bị {id}"}
     else:
-        raise HTTPException(status_code=500, detail="Không thể tắt quạt")
+        raise HTTPException(status_code=500, detail=f"Không thể điều khiển thiết bị {id}")
 
-# Đèn
-@router.post("/control/led/on")
-def light_on():
-    if control_device("led", "1"):
-        log_led_action("on")
-        return {"message": "Đèn đã bật"}
-    else:
-        raise HTTPException(status_code=500, detail="Không thể bật đèn")
-
-@router.post("/control/led/off")
-def light_off():
-    if control_device("led", "0"):
-        log_led_action("off")
-        return {"message": "Đèn đã tắt"}
-    else:
-        raise HTTPException(status_code=500, detail="Không thể tắt đèn")
-
-# Bơm
-@router.post("/control/pump/on")
-def pump_on():
-    if control_device("button-pump", "1"):
-        log_pump_action("on")
-        return {"message": "Máy bơm đã bật"}
-    else:
-        raise HTTPException(status_code=500, detail="Không thể bật máy bơm")
-
-@router.post("/control/pump/off")
-def pump_off():
-    if control_device("button-pump", "0"):
-        log_pump_action("off")
-        return {"message": "Máy bơm đã tắt"}
-    else:
-        raise HTTPException(status_code=500, detail="Không thể tắt máy bơm")
-    
 
 # trả về lịch sử hoạt động:
-@router.get("/logs")
-def get_all_device_logs():
-    fan_logs = get_device_logs("fan_logs")
-    pump_logs = get_device_logs("led_logs")
-    light_logs = get_device_logs("pump_logs")
-    
-    return {
-        "fan_logs": fan_logs,
-        "pump_logs": pump_logs,
-        "light_logs": light_logs
-    }
+@router.get("/device/logs")
+def get_logs_devices(request: log_device):
+    id = request.id
+    return get_device_logs(id)
 
-@router.get("/logs/fan")
-def get_logs_fan():
-    return get_device_logs("fan_logs")
-
-@router.get("/logs/led")
-def get_logs_led():
-    return get_device_logs("led_logs")
-
-@router.get("/logs/pump")
-def get_logs_pump():
-    return get_device_logs("pump_logs")
-
+@router.get("/device/list")
+def get_devices():
+    return get_all_devices()
 
 
     

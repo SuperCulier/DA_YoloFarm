@@ -1,3 +1,4 @@
+from src.config.database import db, update_one
 from src.config.database import *
 from src.models.environment import EnvironmentData
 from fastapi.encoders import jsonable_encoder
@@ -22,6 +23,9 @@ def get_latest_environment_data(region: str):
     )
     return latest_data if latest_data else {"message": "Không tìm thấy dữ liệu"}
 
+def set_threshold(elemental: str, new_value: float):
+    update_one("data_threshold", elemental, new_value)
+    
 def get_history_environment_data(start_day, end_day):
     """Lấy toàn bộ dữ liệu trong khoảng thời gian từ start_day đến end_day"""
     print(f"startDay: {start_day} - type: {type(start_day)}, now: {end_day} - type: {type(end_day)}")
@@ -146,5 +150,3 @@ def get_hourly_environment_data(date):
         } for item in result
     }
     return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
-
-    
