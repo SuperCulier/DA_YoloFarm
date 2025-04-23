@@ -9,6 +9,7 @@ app.include_router(device.router)
 app.include_router(environment.router)
 app.include_router(adafruit.router)
 app.include_router(auth.router)
+app.include_router(device.router) 
 
 @app.get("/")
 def root():
