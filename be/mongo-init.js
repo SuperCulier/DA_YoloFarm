@@ -15,9 +15,14 @@ db = db.getSiblingDB('yolofarm');
 // role: "admin" });
 
 // Thêm thiết bị mẫu
-//db.devices.insertMany([
-//  { name: "Device 1", type: "sensor", status: "active" },
-//  { name: "Device 2", type: "light", status: "inactive" } ]);
+db.devices.insertMany([
+  { id: "f1", name: "Fan xxx", status: "off" },
+  { id: "f3", name: "Fan yyy", status: "off" },
+  { id: "f1", name: "Fan zzz", status: "off" },
+  { id: "p1", name: "Pump zzz", status: "off" },
+  { id: "p2", name: "Pump zxy", status: "off" },
+  { id: "p3", name: "Pump yza", status: "off" },
+]);
 
 
 // Chèn dữ liệu trung bình theo giờ (1h -> 0h)
@@ -69,3 +74,6 @@ db.environment_data.insertOne({
   lux: Math.random() * (1000 - 100) + 100,
   soil_moisture: Math.random() * (60 - 20) + 20
 });
+
+db.data_threshold.insertOne([
+  { temperature: 0, humidity: 0, lux: 0, soil_moisture: 0} ]);

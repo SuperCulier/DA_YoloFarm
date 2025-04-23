@@ -1,4 +1,4 @@
-from src.config.database import db
+from src.config.database import db, update_one
 from src.models.environment import EnvironmentData
 
 COLLECTION_NAME = "environment_data"
@@ -20,3 +20,5 @@ def get_latest_environment_data(region: str):
     )
     return latest_data if latest_data else {"message": "Không tìm thấy dữ liệu"}
 
+def set_threshold(elemental: str, new_value: float):
+    update_one("data_threshold", elemental, new_value)
