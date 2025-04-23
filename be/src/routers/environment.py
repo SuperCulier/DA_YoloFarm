@@ -4,9 +4,11 @@ from src.controllers.environment_controller import (
     get_all_environment_data, 
     get_latest_environment_data,
     set_threshold
+    get_hourly_environment_data,
+    get_history_environment_data,
 )
 from src.models.environment import EnvironmentData
-
+from datetime import datetime
 # Định nghĩa router với tiền tố "/environment"
 router = APIRouter(prefix="/environment", tags=["Environment"])
 
@@ -43,3 +45,29 @@ async def api_set_threshold(threshold_type: str, value: float):
      # độ ẩm không khí: /set-threshold/humidity
      # độ ẩm đất:       /set-threshold/lux
      # ánh sáng:        /set-threshold/soil_moisture
+
+@router.get("/historyData")
+async def read_history(start_day, end_day):
+    """ API để lấy dữ liệu trung bình mỗi ngày theo region, trong khoảng tgian start_dat đến end_day"""
+    if type(start_day) is str:
+        start_day = datetime.fromisoformat(start_day)
+    if type(end_day) is str:
+        end_day = datetime.fromisoformat(end_day)
+    if (start_day > end_day):
+        raise HTTPException(status_code=404, detail="start_day phải nhỏ hơn end_day")
+    data = get_history_environment_data(start_day, end_day)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="Không có dữ liệu trong khoảng thời gian này")
+    return data
+
+@router.get("/hourlyData")
+async def read_hourly(date=None):
+    """date = None là lấy dữ liệu ngày hôm nay"""
+    if type(date) is str:
+        date = datetime.fromisoformat(date)
+    data = get_hourly_environment_data(date)
+    if not data:  
+        raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
+    return data
+

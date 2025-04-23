@@ -41,3 +41,4 @@ def transform_objectid(data):
         return new_data
     else:
         return data
+    return db[collection].delete_one(query).deleted_count
