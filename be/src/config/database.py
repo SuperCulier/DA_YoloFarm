@@ -23,4 +23,3 @@ def update_one(collection, query, new_values):
 
 def delete_one(collection, query):
     return db[collection].delete_one(query).deleted_count
-
