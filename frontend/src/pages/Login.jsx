@@ -3,8 +3,11 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import greenhouse from "../assets/8607387.jpg";
 import { loginUser } from "../apis/LoginAPI";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -13,8 +16,12 @@ export default function Login() {
 
     try {
       const result = await loginUser(username, password);
-      console.log(result)
       alert(result.message);
+
+      if (result.success) {
+        // localStorage.setItem("user", JSON.stringify(result.user)); 
+        navigate("/home"); 
+      }
     } catch (err) {
       alert(err.message);
     }

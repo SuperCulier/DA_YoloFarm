@@ -8,6 +8,10 @@ import { createBrowserRouter } from "react-router-dom";
 export const router = createBrowserRouter([
   {
     path: "/",
+    element: <Login />, 
+  },
+  {
+    path: "/home",
     element: <Home />,
   },
   {
@@ -30,3 +34,4 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
 ]);
+
