@@ -7,11 +7,9 @@ import joblib
 import os
 
 from src.config.database import *
-# from src.models.AI import AIresponse, AIRequest
-# from fastapi.encoders import jsonable_encoder
 
-print("Debug: AI_controller.py loaded")
-print("Available functions in AI_controller:", dir())
+# print("Debug: AI_controller.py loaded")
+# print("Available functions in AI_controller:", dir())
 
 # Đọc dataset
 def load_data(file_path):
