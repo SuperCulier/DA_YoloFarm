@@ -4,9 +4,11 @@ import Footer from "../components/Footer";
 import greenhouse from "../assets/8607387.jpg";
 import { loginUser } from "../apis/LoginAPI";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,12 +18,14 @@ export default function Login() {
 
     try {
       const result = await loginUser(username, password);
-      alert(result.message);
 
-      if (result.success) {
-        // localStorage.setItem("user", JSON.stringify(result.user)); 
-        navigate("/home"); 
-      }
+      login(username);
+
+      // Show success message
+      alert("Đăng nhập thành công ✅");
+
+      // Use navigate after login is complete
+      navigate("/home");
     } catch (err) {
       alert(err.message);
     }

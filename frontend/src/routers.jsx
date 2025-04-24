@@ -3,12 +3,17 @@ import ErrorPage from "./pages/Error.jsx";
 import Weather from "./pages/Garden/Weather.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom"; // Add Navigate import
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+
+const ProtectedRouteWrapper = ({ element }) => (
+  <ProtectedRoute>{element}</ProtectedRoute>
+);
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Login />, 
+    element: <Navigate to="/home" replace />,
   },
   {
     path: "/home",
@@ -20,7 +25,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/weather",
-    element: <Weather />,
+    element: <ProtectedRouteWrapper element={<Weather />} />,
     errorElement: <ErrorPage />,
   },
   {
@@ -30,8 +35,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/device",
-    element: <Device />,
+    element: <ProtectedRouteWrapper element={<Device />} />,
     errorElement: <ErrorPage />,
   },
 ]);
-
