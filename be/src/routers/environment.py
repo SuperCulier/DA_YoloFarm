@@ -3,9 +3,9 @@ from src.controllers.environment_controller import (
     add_environment_data, 
     get_all_environment_data, 
     get_latest_environment_data,
-    set_threshold
+    set_threshold,
     get_hourly_environment_data,
-    get_history_environment_data,
+    get_history_environment_data
 )
 from src.models.environment import EnvironmentData
 from datetime import datetime
