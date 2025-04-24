@@ -1,0 +1,33 @@
+from fastapi import APIRouter, HTTPException
+from src.controllers.ai_controller import (
+    main_train_model,
+    predict,                                           
+)
+from src.models.ai import AIResponse, AIRequest
+
+router = APIRouter(prefix="/ai", tags=["Ai"])
+print("✅ AI Router đã được load")
+@router.get("/train")
+async def train():
+    """API train model"""
+    print("DEBUG TRAIN MODEL")
+    success = main_train_model()
+    if not success:
+        raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
+    return success
+
+@router.get("/predict")
+async def predict_control(req: AIRequest):
+    """ API du doan tin hieu dieu khien PUMP va FAN"""
+    print(req)
+    temp = req.temp
+    humid = req.humid
+    if type(temp) is str:
+        temp = float(temp)
+    if type(humid) is str:
+        humid = float(humid)
+    print(f"temp: {temp}, humid: {humid}")
+    response: AIResponse = predict(temp, humid)
+    if not response:
+        raise HTTPException(status_code=404, detail="Khong du doan duoc")
+    return response

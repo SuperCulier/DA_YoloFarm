@@ -6,7 +6,7 @@ from src.controllers.environment_controller import (
     get_hourly_environment_data,
     get_history_environment_data,
 )
-from src.models.environment import EnvironmentData
+from src.models.environment import EnvironmentData, HistoryRequest, HourlyRequest
 from datetime import datetime
 # Định nghĩa router với tiền tố "/environment"
 router = APIRouter(prefix="/environment", tags=["Environment"])
@@ -34,8 +34,11 @@ async def read_latest_environment_data(region: str):
     return data
 
 @router.get("/historyData")
-async def read_history(start_day, end_day):
+# async def read_history(start_day, end_day):
+async def read_history(r: HistoryRequest):
     """ API để lấy dữ liệu trung bình mỗi ngày theo region, trong khoảng tgian start_dat đến end_day"""
+    start_day = r.start_day
+    end_day = r.end_day
     if type(start_day) is str:
         start_day = datetime.fromisoformat(start_day)
     if type(end_day) is str:
@@ -49,11 +52,43 @@ async def read_history(start_day, end_day):
     return data
 
 @router.get("/hourlyData")
-async def read_hourly(date=None):
+# async def read_hourly(date=None):
+async def read_hourly(r: HourlyRequest):
     """date = None là lấy dữ liệu ngày hôm nay"""
+    date = r.date
     if type(date) is str:
         date = datetime.fromisoformat(date)
     data = get_hourly_environment_data(date)
     if not data:  
         raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
     return data
+
+from src.controllers.ai_controller import (
+    main_train_model,
+    predict,                                           
+)
+from src.models.ai import AIResponse, AIRequest
+@router.get("/train")
+async def train():
+    """API train model"""
+    print("DEBUG TRAIN MODEL")
+    success = main_train_model()
+    if not success:
+        raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
+    return success
+
+@router.get("/predict")
+async def predict_control(req: AIRequest):
+    """ API du doan tin hieu dieu khien PUMP va FAN"""
+    print(req)
+    temp = req.temp
+    humid = req.humid
+    if type(temp) is str:
+        temp = float(temp)
+    if type(humid) is str:
+        humid = float(humid)
+    print(f"temp: {temp}, humid: {humid}")
+    response: AIResponse = predict(temp, humid)
+    if not response:
+        raise HTTPException(status_code=404, detail="Khong du doan duoc")
+    return response
