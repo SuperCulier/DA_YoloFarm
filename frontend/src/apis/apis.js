@@ -4,7 +4,12 @@ export const GET_WEATHER_DATA_API = `${BASE_URL}/show-last-data`;
 
 export const LOGIN_API = `${BASE_URL}/login`;
 
-export const DEVICES_API = `${BASE_URL}/device`;
+export const GET_DEVICES_API = `${BASE_URL}/device/list`;
 
-export const GET_DEVICE_API = (deviceId) => `${DEVICES_API}/${deviceId}`;
+export const GET_DEVICE_LOG_API = `${BASE_URL}/device/logs`;
 
+export const CONTROL_DEVICE_API = `${BASE_URL}/device/control`;
+
+export const GET_WEATHER_HOURLY_API = `${BASE_URL}/environment/hourlyData`;
+
+export const GET_WEATHER_DAILY_API = `${BASE_URL}/environment/historyData`;

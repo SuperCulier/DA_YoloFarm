@@ -6,8 +6,18 @@ import {
   faSun,
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/forest.png";
+import { useAuth } from "../AuthContext"; // Adjust path as needed
+import { useNavigate } from "react-router-dom";
 
 export default function SideBar() {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login"); // Redirect to login page after logout
+  };
+
   return (
     <>
       <button
@@ -26,8 +36,8 @@ export default function SideBar() {
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
+            clipRule="evenodd"
+            fillRule="evenodd"
             d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
           ></path>
         </svg>
@@ -70,14 +80,14 @@ export default function SideBar() {
               >
                 <FontAwesomeIcon icon={faUser} className="text-gray-600" />
                 <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
-                  Người dùng
+                  {user?.username || "User"}
                 </span>
               </a>
             </li>
             <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <FontAwesomeIcon
                   icon={faArrowRightFromBracket}
@@ -86,10 +96,10 @@ export default function SideBar() {
                 <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
                   Đăng xuất
                 </span>
-              </a>
+              </button>
             </li>
           </ul>
-          <ul class="pt-4 mt-4 space-y-2 font-medium border-t border-gray-200 dark:border-gray-700">
+          <ul className="pt-4 mt-4 space-y-2 font-medium border-t border-gray-200 dark:border-gray-700">
             <li>
               <a href="/" className="flex items-center">
                 <img src={logo} className="mr-3 h-6 sm:h-9" alt="Logo" />
