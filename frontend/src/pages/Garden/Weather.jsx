@@ -79,7 +79,7 @@ export default function Weather() {
       setWeatherData({
         temperature: data.temperature,
         humidity: data.humidity,
-        soilMoisture: data.soil_moisture,
+        soilMoisture: data.soilMoisture,
         lux: data.lux,
         timestamp: new Date(data.timestamp).toLocaleTimeString([], {
           hour: "2-digit",
