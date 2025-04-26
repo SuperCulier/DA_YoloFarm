@@ -2,10 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import joblib
 import os
-
+from fastapi.encoders import jsonable_encoder
 from src.config.database import *
 
 # print("Debug: AI_controller.py loaded")
@@ -28,6 +28,15 @@ def evaluate_model(model, X_test, y_test):
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     print(f'Accuracy: {accuracy:.4f}')
+    
+    precision = precision_score(y_test, y_pred, average="weighted")
+    print(f'Precision: {precision:.4f}')
+
+    recall = recall_score(y_test, y_pred, average="weighted")
+    print(f'Recall: {recall:.4f}')
+
+    f1 = f1_score(y_test, y_pred, average="weighted")
+    print(f'F1 Score: {f1:.4f}')
 
 # Trực quan hóa cây quyết định
 def visualize_tree(model):
@@ -58,16 +67,17 @@ def main_train_model():
 
     # Lưu mô hình
     joblib.dump(model, model_filename)
+    print(f"Mô hình đã được trained với thông tin sau:")
     print("Độ sâu của cây quyết định:", model.get_depth())
 
     # Đánh giá mô hình
     evaluate_model(model, X_test, y_test)
     
-    # # Trực quan hóa cây quyết định
-    # visualize_tree(model)
+    # Trực quan hóa cây quyết định
+    visualize_tree(model)
     return True
 
-def predict(temp, humid):
+def predict_from_model(temp, humid):
 
     current_dir = os.path.dirname(__file__)
     model_filename = os.path.join(current_dir, "..", "dataset", "decision_tree_model_FanPump.pkl")
@@ -75,4 +85,6 @@ def predict(temp, humid):
 
     model = joblib.load(model_filename)
     prediction = model.predict([[temp, humid]])
-    return prediction[0][0], prediction[0][1]
+    print(f"Dự đoán tín hiệu điều khiển")
+    print(f"Bơm: {prediction[0][0]}, Quạt: {prediction[0][1]}")
+    return {"pump" : int(prediction[0][0]), "fan" : int(prediction[0][1])}

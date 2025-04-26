@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from src.controllers.ai_controller import (
     main_train_model,
-    predict,                                           
+    predict_from_model                                           
 )
 from src.models.ai import AIResponse, AIRequest
 
@@ -25,7 +25,8 @@ async def predict_control(req: AIRequest):
     if type(humid) is str:
         humid = float(humid)
     # print(f"temp: {temp}, humid: {humid}")
-    response: AIResponse = predict(temp, humid)
+    response :  AIResponse = predict_from_model(temp, humid)
+    print(f"response: {response}")
     if not response:
         raise HTTPException(status_code=404, detail="không dự đoán được")
     return response
