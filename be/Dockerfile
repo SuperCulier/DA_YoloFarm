@@ -10,6 +10,7 @@ COPY . .
 # Cài đặt thư viện từ requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Expose cổng 8000 để truy cập API
 EXPOSE 8000
 
