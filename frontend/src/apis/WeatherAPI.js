@@ -24,12 +24,27 @@ export const fetchLatestWeatherData = async () => {
   }
 };
 
-export const getWeatherHourly = async () => {
+export const getWeatherHourly = async (date) => {
   try {
-    const response = await axios.get(GET_WEATHER_HOURLY_API);
-    console.log(response.data);
-    return{
-      
-    }
-  } catch (error) {}
+    const response = await axios.get(GET_WEATHER_HOURLY_API, {
+      params: date ? {date} : {},
+    });
+    const roundedData = {};
+    
+    // Assuming response.data is an object with hour keys
+    Object.entries(response.data).forEach(([hour, values]) => {
+      roundedData[hour] = {
+        temperature: parseFloat(values.temperature.toFixed(1)),
+        humidity: parseFloat(values.humidity.toFixed(1)),
+        soil_moisture: parseFloat(values.soil_moisture.toFixed(1)),
+        lux: parseFloat(values.lux.toFixed(1)),
+      };
+    });
+    
+    console.log("Rounded hourly data:", roundedData);
+    return roundedData;
+  } catch (error) {
+    console.error("Error fetching hourly weather data:", error);
+    throw error;
+  }
 };
