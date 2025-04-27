@@ -23,8 +23,8 @@ def get_latest_environment_data(region: str):
     )
     return latest_data if latest_data else {"message": "Không tìm thấy dữ liệu"}
 
-def set_threshold(elemental: str, new_value: float):
-    update_one("data_threshold", elemental, new_value)
+def set_threshold(elemental: str, min_value: float, max_value: float):
+    update_one("data_threshold", {"name": elemental}, {"min": min_value, "max": max_value})
     
 def get_history_environment_data(start_day, end_day):
     """Lấy toàn bộ dữ liệu trong khoảng thời gian từ start_day đến end_day"""
