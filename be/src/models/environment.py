@@ -8,6 +8,13 @@ class EnvironmentData(BaseModel):
     area: str  # Khu vực đo thông số
     timestamp: datetime
 
+class HistoryRequest(BaseModel):
+    start_day: datetime
+    end_day: datetime
+
+class HourlyRequest(BaseModel):
+    date : datetime
+
 class en_threshold(BaseModel):
     name: str
     minValue: float

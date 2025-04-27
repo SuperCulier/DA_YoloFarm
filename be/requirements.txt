@@ -6,4 +6,8 @@ python-dotenv==1.0.1
 pydantic
 requests
 passlib[bcrypt]
+pandas
+scikit-learn
+joblib
+matplotlib
 bcrypt==3.2.0
