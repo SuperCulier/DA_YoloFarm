@@ -7,7 +7,9 @@ from src.controllers.environment_controller import (
     get_hourly_environment_data,
     get_history_environment_data,
 )
-from src.models.environment import EnvironmentData, HistoryRequest, HourlyRequest
+
+from src.models.environment import EnvironmentData, HistoryRequest, HourlyRequest, en_threshold
+
 from datetime import datetime
 # Định nghĩa router với tiền tố "/environment"
 router = APIRouter(prefix="/environment", tags=["Environment"])
@@ -34,17 +36,11 @@ async def read_latest_environment_data(region: str):
         raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
     return data
 
-@router.put("/set-threshold/{threshold_type}")
-async def api_set_threshold(threshold_type: str, value: float):
-    set_threshold(threshold_type, value)
-    return {"message": "Threshold set", "type": threshold_type, "value": value}
+@router.put("/environment/set-threshold")
+async def api_set_threshold(request: en_threshold):
+    set_threshold(request.name, request.minValue, request.maxValue)
+    return {"message": "Threshold set", "name": request.name, "Min value": request.minValue, "Max value": request.maxValue,}
 
-# body json: {"value": 42.5}
-# thay đổi các giá trị ngưỡng:
-     # nhiệt độ:        /set-threshold/temperature
-     # độ ẩm không khí: /set-threshold/humidity
-     # độ ẩm đất:       /set-threshold/lux
-     # ánh sáng:        /set-threshold/soil_moisture
 
 @router.get("/historyData")
 # async def read_history(start_day, end_day):

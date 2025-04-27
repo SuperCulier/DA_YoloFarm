@@ -14,3 +14,8 @@ class HistoryRequest(BaseModel):
 
 class HourlyRequest(BaseModel):
     date : datetime
+
+class en_threshold(BaseModel):
+    name: str
+    minValue: float
+    maxValue: float
