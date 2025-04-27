@@ -47,7 +47,7 @@ def api_control_device(request: control_model):
 
 
 # trả về lịch sử hoạt động:
-@router.get("/device/logs")
+@router.post("/device/logs")
 def get_logs_devices(request: log_device):
     id = request.id
     return get_device_logs(id)
