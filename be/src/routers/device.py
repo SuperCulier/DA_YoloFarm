@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_device_action, get_device_logs, get_all_devices
-from src.models.device_model import Device, control_model, log_device
+from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_device_action, get_device_logs, get_all_devices, run_auto_mode
+from src.models.device_model import Device, control_model, log_device, Device_auto
+import asyncio
+#from src.services.adafruit_service import show_value
 
 """
 router = APIRouter(prefix="/device", tags=["Device"])
@@ -44,6 +46,28 @@ def api_control_device(request: control_model):
         return {"message": f"Đã {status} thiết bị {id}"}
     else:
         raise HTTPException(status_code=500, detail=f"Không thể điều khiển thiết bị {id}")
+
+# Router để bật/tắt chế độ tự động
+@router.post("/device/control/auto")
+async def control_device_auto(request: Device_auto):
+    global status
+
+    # Nếu yêu cầu bật chế độ auto (status == 1)
+    if request.status == 1:
+        if status == 0:  # Nếu chế độ auto chưa bật, thì bắt đầu vòng lặp
+            status = 1
+            asyncio.create_task(run_auto_mode())  # Bắt đầu chạy task bất đồng bộ
+            return {"message": "Chế độ tự động đã được bật."}
+        else:
+            return {"message": "Chế độ tự động đã được bật."}
+
+    # Nếu yêu cầu tắt chế độ auto (status == 0)
+    elif request.status == 0:
+        status = 0  # Tắt chế độ auto
+        return {"message": "Chế độ tự động đã được tắt."}
+
+    return {"message": "Trạng thái không hợp lệ. Chỉ chấp nhận giá trị status=0 hoặc status=1."}
+
 
 
 # trả về lịch sử hoạt động:

@@ -4,10 +4,11 @@ import requests
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
+from ai_controller import predict_from_model
 
 print("Debug: device_controller.py loaded")
 print("Available functions in device_controller:", dir())
-
+feed = ["button-fan", "button-pump"]
 
 DEVICE_LOGS_COLLECTION = "divice_logs"
 #hàm bật tắt thiết bị
@@ -29,6 +30,27 @@ def control_device(feed_key: str, value: int):
     print("Response text:", response.text)
 
     return response.status_code == 200
+
+#điều khiển tự động.
+def control_devices_based_on_prediction(temp, humid):
+    # Lấy tín hiệu điều khiển từ mô hình
+    control_signals = predict_from_model(temp, humid)
+    
+    # Điều khiển bơm và quạt dựa trên tín hiệu dự đoán
+    pump_signal = control_signals["pump"]
+    fan_signal = control_signals["fan"]
+
+    # Gọi hàm điều khiển cho bơm và quạt
+    pump_control_result = control_device(feed[1], pump_signal)
+    fan_control_result = control_device(feed[0], fan_signal)
+
+    # Trả kết quả của việc điều khiển thiết bị
+    if pump_control_result and fan_control_result:
+        print("Cả bơm và quạt đã được điều khiển thành công.")
+    else:
+        print("Có lỗi trong quá trình điều khiển thiết bị.")
+
+    return pump_control_result, fan_control_result
 
 # ghi lại lịch sử bật tắt vào từng colection
 def log_device_action(id: str, action: str):
