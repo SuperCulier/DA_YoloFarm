@@ -7,3 +7,7 @@ pydantic
 requests
 passlib[bcrypt]
 bcrypt==3.2.0
+pandas
+scikit-learn
+joblib
+matplotlib

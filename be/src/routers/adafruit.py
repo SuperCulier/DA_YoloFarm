@@ -26,8 +26,8 @@ def get_latest_data():
     temp = {}
     temp["temperature"] = res["temperature"]
     temp["humidity"] = res["humidity"]
-    temp["light"] = res["lux"]
+    temp["lux"] = res["lux"]
+    temp["soil_moisture"] = res["soil_moisture"]
     temp["timestamp"] = res["timestamp"]
-    temp["area"] = "farm_1"
     add_environment_data(temp)
     return res
