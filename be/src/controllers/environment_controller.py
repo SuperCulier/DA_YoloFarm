@@ -1,4 +1,4 @@
-from src.config.database import db, update_one
+from src.config.database import db, update_one, insert_one
 from src.config.database import *
 from src.models.environment import EnvironmentData
 from fastapi.encoders import jsonable_encoder
@@ -8,7 +8,7 @@ COLLECTION_NAME = "environment_data"
 
 def add_environment_data(data: EnvironmentData):
     """Thêm dữ liệu môi trường vào MongoDB"""
-    return db[COLLECTION_NAME].insert_one(data.model_dump()).inserted_id
+    return db[COLLECTION_NAME].insert_one(data).inserted_id
 
 def get_all_environment_data():
     """Lấy toàn bộ dữ liệu môi trường"""

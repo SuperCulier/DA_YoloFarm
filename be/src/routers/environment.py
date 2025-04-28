@@ -7,7 +7,7 @@ from src.controllers.environment_controller import (
     get_hourly_environment_data,
     get_history_environment_data,
 )
-from src.models.environment import EnvironmentData, en_threshold
+from src.models.environment import EnvironmentData, en_threshold, HistoryRequest, HourlyRequest
 from datetime import datetime
 # Định nghĩa router với tiền tố "/environment"
 router = APIRouter(prefix="/environment", tags=["Environment"])
@@ -39,10 +39,12 @@ async def api_set_threshold(request: en_threshold):
     set_threshold(request.name, request.minValue, request.maxValue)
     return {"message": "Threshold set", "name": request.name, "Min value": request.minValue, "Max value": request.maxValue,}
 
-
 @router.get("/historyData")
-async def read_history(start_day, end_day):
+# async def read_history(start_day, end_day):
+async def read_history(r: HistoryRequest):
     """ API để lấy dữ liệu trung bình mỗi ngày theo region, trong khoảng tgian start_dat đến end_day"""
+    start_day = r.start_day
+    end_day = r.end_day
     if type(start_day) is str:
         start_day = datetime.fromisoformat(start_day)
     if type(end_day) is str:
@@ -56,12 +58,13 @@ async def read_history(start_day, end_day):
     return data
 
 @router.get("/hourlyData")
-async def read_hourly(date=None):
+# async def read_hourly(date=None):
+async def read_hourly(r: HourlyRequest):
     """date = None là lấy dữ liệu ngày hôm nay"""
+    date = r.date
     if type(date) is str:
         date = datetime.fromisoformat(date)
     data = get_hourly_environment_data(date)
     if not data:  
         raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
     return data
-
