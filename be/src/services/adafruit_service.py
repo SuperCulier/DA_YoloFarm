@@ -10,7 +10,7 @@ COLLECTION_NAME = "environment_data"
 
 def fetch_data(feed_key):
     """Lấy dữ liệu từ Adafruit IO"""
-    url = f"https://io.adafruit.com/api/v2/{ADAFRUIT_IO_USERNAME}/feeds/{feed_key}/data"
+    url = f"https://io.adafruit.com/api/v2/{ADAFRUIT_IO_USERNAME}/feeds/{feed_key}/data?limit=1"
     headers = {"X-AIO-Key": ADAFRUIT_IO_KEY}
     
     # Kiểm tra phản hồi từ Adafruit
@@ -19,10 +19,10 @@ def fetch_data(feed_key):
 
     response = requests.get(url, headers=headers)
 
-    print(f" da qua doan nay///////////////////////////////////////////////////")
+    #print(f" da qua doan nay///////////////////////////////////////////////////")
 
-    print(f"📡 Status Code: {response.status_code}")
-    print(f"📡 Response JSON: {response.json()}")
+    #print(f"📡 Status Code: {response.status_code}")
+    #print(f"📡 Response JSON: {response.json()}")
 
     if response.status_code == 200:
         data = response.json()
@@ -55,7 +55,7 @@ def show_value():
     return latest_data
 """
     
-def show_value():
+async def show_value():
     """Trả về dữ liệu JSON gồm 1 timestamp duy nhất và các thông số đo được từ Adafruit IO."""
     result = {}
     latest_timestamp = None

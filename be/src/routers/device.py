@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_device_action, get_device_logs, get_all_devices, run_auto_mode
 from src.models.device_model import Device, control_model, log_device, Device_auto
+from src.controllers.ai_controller import predict_from_model
+from src.services.adafruit_service import show_value
+from src.config.settings import status
 import asyncio
 #from src.services.adafruit_service import show_value
 
@@ -25,7 +28,6 @@ def remove_device(device_id: str):
 
 router = APIRouter()
 feed = ["button-fan", "button-pump"]
-
 
 # API bat tat thiet bi
 @router.post("/device/control")
@@ -68,7 +70,10 @@ async def control_device_auto(request: Device_auto):
 
     return {"message": "Trạng thái không hợp lệ. Chỉ chấp nhận giá trị status=0 hoặc status=1."}
 
-
+@router.get("/ai")
+async def testAi():
+    input = await show_value()
+    predict_from_model(input.get("temperature"), input.get("humidity"))
 
 # trả về lịch sử hoạt động:
 @router.post("/device/logs")

@@ -77,7 +77,7 @@ def main_train_model():
     visualize_tree(model)
     return True
 
-def predict_from_model(temp, humid):
+async def predict_from_model(temp, humid):
 
     current_dir = os.path.dirname(__file__)
     model_filename = os.path.join(current_dir, "..", "dataset", "decision_tree_model_FanPump.pkl")

@@ -15,3 +15,5 @@ ADAFRUIT_IO_KEY = os.getenv("ADAFRUIT_IO_KEY")  #chỗ này bị lỗi - nên ph
 # Thông tin MongoDB
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
+
+status = 0
