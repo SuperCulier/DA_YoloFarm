@@ -1,12 +1,3 @@
-# thay đổi các giá trị ngưỡng (phần này chưa sửa, sẽ update sau)
-    # body json: {"value": 42.5}
-    # nhiệt độ:        /set-threshold/temperature
-    # độ ẩm không khí: /set-threshold/humidity
-    # độ ẩm đất:       /set-threshold/lux
-    # ánh sáng:        /set-threshold/soil_moisture
-
-
-
 # API bat tat thiet bi
   @router.post("/device/control")
 
@@ -91,3 +82,12 @@
         "status": "off"
     }
   ]
+
+
+# Nội dung đã fix
+  database tự động cập nhật dữ liệu
+  show_value lấy dữ liệu từ database
+  đổi phương thức thành Post.
+  Thêm api cài đặt ngưỡng.
+  chuyển đổi múi giờ trước khi lưu vào database
+  đang fix bật tắt tự động {vẫn chưa chạy được}

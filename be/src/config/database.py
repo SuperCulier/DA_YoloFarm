@@ -1,6 +1,7 @@
 import pymongo
 from .settings import MONGO_URI, DB_NAME
 from bson import ObjectId
+from pymongo import DESCENDING
 
 client = pymongo.MongoClient(MONGO_URI)
 db = client[DB_NAME]
@@ -19,6 +20,11 @@ def find_one(collection, query):
 
 def find_all(collection, query={}):
     return list(db[collection].find(query))
+
+def find_one_latest(collection_name):
+    """Tìm bản ghi mới nhất (theo timestamp giảm dần)"""
+    collection = db[collection_name]
+    return collection.find_one(sort=[("timestamp", DESCENDING)])
 
 def update_one(collection, query, new_values):
     return db[collection].update_one(query, {"$set": new_values}).modified_count
