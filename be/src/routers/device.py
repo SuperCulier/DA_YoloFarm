@@ -73,7 +73,7 @@ async def control_device_auto(request: Device_auto):
 @router.get("/ai")
 async def testAi():
     input = await show_value()
-    predict_from_model(input.get("temperature"), input.get("humidity"))
+    await predict_from_model(input.get("temperature"), input.get("humidity"))
 
 # trả về lịch sử hoạt động:
 @router.post("/device/logs")

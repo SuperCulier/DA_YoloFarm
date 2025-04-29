@@ -1,6 +1,11 @@
 // Chuyển sang database 'yolofarm'
 db = db.getSiblingDB('yolofarm');
 
+// Hàm tạo timestamp theo định dạng ISO
+function formatTimestamp(date) {
+  return date.toISOString();
+}
+
 // Tạo user nếu chưa có
 /*db.createUser({
   user: "admin",
@@ -24,7 +29,7 @@ db.devices.insertMany([
   { id: "p3", name: "Pump yza", status: "off" },
 ]);
 
-
+/*
 // Chèn dữ liệu trung bình theo giờ (1h -> 0h)
 let hourlyData = [];
 for (let i = 1; i <= 24; i++) {
@@ -74,6 +79,7 @@ db.environment_data.insertOne({
   lux: Math.random() * (1000 - 100) + 100,
   soil_moisture: Math.random() * (60 - 20) + 20
 });
+*/
 
 db.data_threshold.insertOne([
   { name: "temperature", min: 20.0, max: 40.0},
@@ -81,3 +87,48 @@ db.data_threshold.insertOne([
   { name: "lux", min: 0.0, max: 50.0},
   { name: "soil_moisture", min: 0.0, max: 50.0}
 ]);
+
+// thêm data và enviroment_data
+// Tạo dữ liệu từ 1/4/2025 đến ngày hôm trước
+const startDate = new Date('2025-04-20T00:30:00');
+const endDate = new Date(); // Ngày hiện tại
+const data = [];
+
+// Dữ liệu cho ngày 1/4/2025 đến hôm qua, cách 1 giờ
+let currentDate = startDate;
+while (currentDate < endDate) {
+    data.push({
+        "temperature": +((Math.random() * 10) + 20).toFixed(1),  // ép kiểu thành number
+        "humidity": +((Math.random() * 20) + 40).toFixed(1),
+        "lux": +((Math.random() * 30) + 50).toFixed(1),
+        "soil_moisture": +((Math.random() * 100)).toFixed(1),
+        "timestamp": formatTimestamp(currentDate)
+    });
+
+    // Tăng thời gian thêm 1 giờ
+    currentDate.setHours(currentDate.getHours() + 1);
+}
+
+// Tạo dữ liệu cho ngày hôm nay, cách 10 phút
+const todayStartDate = new Date(new Date().setHours(0, 10, 0, 0)); // Ngày hôm nay lúc 00:10
+
+// Chuyển đổi giờ UTC sang giờ Việt Nam (GMT+7)
+const todayEndDate = new Date(endDate.toLocaleString("en-GB", { timeZone: "Asia/Ho_Chi_Minh" }));
+
+let currentDateToday = todayStartDate;
+while (currentDateToday < todayEndDate) {
+    data.push({
+        "temperature": +((Math.random() * 10) + 20).toFixed(1),
+        "humidity": +((Math.random() * 20) + 40).toFixed(1),
+        "lux": +((Math.random() * 30) + 50).toFixed(1),
+        "soil_moisture": +((Math.random() * 100)).toFixed(1),
+        "timestamp": formatTimestamp(currentDateToday)
+    });
+
+    // Tăng thời gian thêm 10 phút
+    currentDateToday.setMinutes(currentDateToday.getMinutes() + 10);
+}
+
+
+// Lưu dữ liệu vào collection 'environment_data'
+db.environment_data.insertMany(data);

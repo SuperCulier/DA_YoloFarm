@@ -77,7 +77,7 @@ async def update_environment_data():
 
     return jsonable_encoder(data)
 
-def show_value():
+async def show_value():
     """Trả về dữ liệu JSON gồm 1 timestamp duy nhất và các thông số đo được từ MongoDB."""
     latest_data = find_one_latest(COLLECTION_NAME)
 
