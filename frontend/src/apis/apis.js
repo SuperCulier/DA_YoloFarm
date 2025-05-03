@@ -10,6 +10,8 @@ export const GET_DEVICE_LOG_API = `${BASE_URL}/device/logs`;
 
 export const CONTROL_DEVICE_API = `${BASE_URL}/device/control`;
 
+export const SET_CONTROL_MODE_API = `${BASE_URL}/device/control/auto`;
+
 export const GET_WEATHER_HOURLY_API = `${BASE_URL}/environment/hourlyData`;
 
 export const GET_WEATHER_DAILY_API = `${BASE_URL}/environment/historyData`;

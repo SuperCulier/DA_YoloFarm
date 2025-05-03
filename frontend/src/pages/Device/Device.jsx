@@ -4,7 +4,7 @@ import DeviceInfo from "./DeviceInfo.jsx";
 import { useState, useEffect } from "react";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getDeviceList, getDeviceLog, controlDevice } from "../../apis/DeviceAPI.js";
+import { getDeviceList, getDeviceLog, controlDevice, setControlMode } from "../../apis/DeviceAPI.js";
 
 const DeviceList = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -54,7 +54,7 @@ const DeviceList = () => {
       }
       setSelectedDevice(selected);
       setShowDeviceInfo(true);
-      setError(null); // Clear any previous errors
+      setError(null); 
     } catch (err) {
       console.error(`Error fetching history for device ${deviceId}:`, err.message);
       setError(`Không thể tải lịch sử thiết bị ${deviceId}: ${err.message}`);
@@ -78,11 +78,25 @@ const DeviceList = () => {
     try {
       const value = newStatus ? 1 : 0;
       await controlDevice(device.id, value);
-      console.log(`Device ${device.id} toggled to ${newStatus ? "on" : "off"}`);
+      console.log(`Device ${device.id} toggled to ${newStatus ? "Bật" : "Tắt"}`);
     } catch (err) {
       setDevices(originalDevices);
       setError(`Không thể điều khiển thiết bị ${device.name}: ${err.message}`);
       console.error("Error controlling device:", err);
+    }
+  };
+
+  const handleControlModeToggle = async (checked) => {
+    try {
+      const status = checked ? 1 : 0;
+      const success = await setControlMode(status);
+      if (success) {
+        setIsAutoMode(checked);
+      } else {
+        alert("Không thể thay đổi chế độ điều khiển.");
+      }
+    } catch (err) {
+      alert(`Lỗi khi đổi chế độ điều khiển: ${err.message}`);
     }
   };
 
@@ -100,7 +114,7 @@ const DeviceList = () => {
               </span>
               <Switch 
                 checked={isAutoMode} 
-                onCheckedChange={(checked) => setIsAutoMode(checked)} 
+                onCheckedChange={handleControlModeToggle}
               />
               <span className={`px-2 text-sm font-medium ${isAutoMode ? "text-green-600 font-bold" : "text-gray-500"}`}>
                 Tự động
