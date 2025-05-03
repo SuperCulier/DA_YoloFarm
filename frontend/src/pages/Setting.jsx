@@ -2,6 +2,7 @@ import { useState } from "react";
 import SideBar from "../components/SideBar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTemperatureHalf, faDroplet, faSeedling, faSun } from "@fortawesome/free-solid-svg-icons";
+import { setThreshold } from "../apis/ThresholdAPI";
 
 export default function Setting() {
   // State for min and max thresholds for each parameter
@@ -13,6 +14,10 @@ export default function Setting() {
   const [soilMoistureMax, setSoilMoistureMax] = useState(40);
   const [luxMin, setLuxMin] = useState(800);
   const [luxMax, setLuxMax] = useState(1000);
+  
+  // Add loading and success states
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null);
 
   // Handler to ensure max is not less than min
   const handleMinMax = (minSetter, maxSetter, minValue, maxValue, newValue, isMin) => {
@@ -22,6 +27,45 @@ export default function Setting() {
     } else {
       if (newValue >= minValue) maxSetter(newValue);
       else maxSetter(minValue);
+    }
+  };
+
+  // Function to handle saving all thresholds
+  const handleSaveThresholds = async () => {
+    setIsLoading(true);
+    setSaveStatus(null);
+    
+    try {
+      // Create an array of all the threshold settings
+      const thresholdSettings = [
+        { name: "temperature", minValue: temperatureMin, maxValue: temperatureMax },
+        { name: "humidity", minValue: humidityMin, maxValue: humidityMax },
+        { name: "soilMoisture", minValue: soilMoistureMin, maxValue: soilMoistureMax },
+        { name: "lux", minValue: luxMin, maxValue: luxMax }
+      ];
+      
+      // Call the API for each threshold setting
+      const results = await Promise.all(
+        thresholdSettings.map(setting => 
+          setThreshold(setting.name, setting.minValue, setting.maxValue)
+        )
+      );
+      
+      // Check if all API calls were successful
+      const allSuccessful = results.every(result => result === true);
+      
+      if (allSuccessful) {
+        setSaveStatus("success");
+        // Reset status after 3 seconds
+        setTimeout(() => setSaveStatus(null), 3000);
+      } else {
+        setSaveStatus("error");
+      }
+    } catch (error) {
+      console.error("Error saving thresholds:", error);
+      setSaveStatus("error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -185,6 +229,31 @@ export default function Setting() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Save Button */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleSaveThresholds}
+              disabled={isLoading}
+              className={`px-8 py-3 rounded-lg font-medium text-white transition-colors duration-300 ${
+                isLoading 
+                  ? "bg-gray-500" 
+                  : saveStatus === "success"
+                  ? "bg-green-500 hover:bg-green-600" 
+                  : saveStatus === "error"
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-blue-500 hover:bg-blue-600"
+              }`}
+            >
+              {isLoading 
+                ? "Đang lưu..." 
+                : saveStatus === "success" 
+                ? "Lưu thành công!" 
+                : saveStatus === "error" 
+                ? "Lưu thất bại" 
+                : "Lưu cài đặt"}
+            </button>
           </div>
         </div>
       </div>
