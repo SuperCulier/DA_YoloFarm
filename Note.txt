@@ -1,0 +1,26 @@
+docker compose down -v  # Dừng và xóa container + volume (khi muốn sửa code)
+docker compose up --build -d  # Build lại container, load code lên docker
+
+docker-compose build --no-cache
+
+#### lệnh truy cập database
+docker exec -it mongo-yolofarm mongosh
+use admin
+db.auth("yolouser", "123456")
+show dbs  # Hiển thị danh sách database
+use yolofarm  # Chọn database
+show collections  # Xem danh sách bảng (collections)
+db.environment_data.find().pretty() # truy cập collections enviroment_data
+
+db.average_by_day.find().pretty()
+db.average_by_hour.find().pretty()
+db.average_by_month.find().pretty()
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+
+# nội dung chưa sửa: chỉnh status của thiết bị sau khi bật tắt.
+

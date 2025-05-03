@@ -8,3 +8,12 @@ tải docker desktop (không cần cài Mongo và các thư viện python)
    Xóa tất cả thư mục __pycache__ trong Be (nếu có)
    Chạy lên lệnh 2 để load code mới
 
+
+
+4. Nội dung đã fix:
+  database tự động cập nhật dữ liệu,
+  show_value lấy dữ liệu từ database,
+  đổi phương thức thành Post.
+  Thêm api cài đặt ngưỡng.
+  chuyển đổi múi giờ trước khi lưu vào database,
+  đang fix bật tắt tự động {vẫn chưa chạy được}

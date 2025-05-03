@@ -1,15 +1,18 @@
 from src.config.database import insert_one, find_one, update_one, delete_one, find_all, transform_objectid
 from src.models.device_model import Device
+from src.services.adafruit_service import show_value
 import requests
 from datetime import datetime, timezone
 from fastapi import HTTPException
-from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
+from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY,status
+from src.controllers.ai_controller import predict_from_model
+import asyncio
 
 print("Debug: device_controller.py loaded")
 print("Available functions in device_controller:", dir())
+feed = ["button-fan", "button-pump"]
 
-
-DEVICE_LOGS_COLLECTION = "divice_logs"
+DEVICE_LOGS_COLLECTION = "device_logs"
 #hàm bật tắt thiết bị
 def control_device(feed_key: str, value: int):
     if value not in (0, 1):
@@ -29,6 +32,38 @@ def control_device(feed_key: str, value: int):
     print("Response text:", response.text)
 
     return response.status_code == 200
+
+#điều khiển tự động.
+async def control_devices_based_on_prediction(temp, humid):
+    # Lấy tín hiệu điều khiển từ mô hình
+    control_signals = await predict_from_model(temp, humid)  # Đảm bảo await để đợi kết quả từ predict_from_model
+
+    # Điều khiển bơm và quạt dựa trên tín hiệu dự đoán
+    pump_signal = control_signals["pump"]
+    fan_signal = control_signals["fan"]
+
+    # Gọi hàm điều khiển cho bơm và quạt
+    pump_control_result = control_device(feed[1], pump_signal)
+    fan_control_result = control_device(feed[0], fan_signal)
+
+    # Trả kết quả của việc điều khiển thiết bị
+    if pump_control_result and fan_control_result:
+        print("Cả bơm và quạt đã được điều khiển thành công.")
+    else:
+        print("Có lỗi trong quá trình điều khiển thiết bị.")
+
+    return pump_control_result, fan_control_result
+
+
+async def run_auto_mode():
+    global status
+    while status == 1:
+        input_data = await show_value()
+        temperature = input_data.get("temperature")
+        humidity = input_data.get("humidity")
+        await control_devices_based_on_prediction(temperature, humidity)
+        await asyncio.sleep(5)
+
 
 # ghi lại lịch sử bật tắt vào từng colection
 def log_device_action(id: str, action: str):
