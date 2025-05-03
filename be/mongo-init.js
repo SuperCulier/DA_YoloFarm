@@ -22,11 +22,7 @@ function formatTimestamp(date) {
 // Thêm thiết bị mẫu
 db.devices.insertMany([
   { id: "f1", name: "Fan xxx", status: "off" },
-  { id: "f3", name: "Fan yyy", status: "off" },
-  { id: "f1", name: "Fan zzz", status: "off" },
-  { id: "p1", name: "Pump zzz", status: "off" },
-  { id: "p2", name: "Pump zxy", status: "off" },
-  { id: "p3", name: "Pump yza", status: "off" },
+  { id: "p3", name: "Pump yza", status: "off" }
 ]);
 
 /*

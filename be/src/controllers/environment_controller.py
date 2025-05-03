@@ -2,7 +2,7 @@ from src.config.database import db, update_one
 from src.config.database import *
 from src.models.environment import EnvironmentData
 from fastapi.encoders import jsonable_encoder
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 COLLECTION_NAME = "environment_data"
 
@@ -27,8 +27,26 @@ def set_threshold(elemental: str, min_value: float, max_value: float):
     update_one("data_threshold", {"name": elemental}, {"min": min_value, "max": max_value})
     
 def get_history_environment_data(start_day, end_day):
-    """Lấy toàn bộ dữ liệu trong khoảng thời gian từ start_day đến end_day"""
-    print(f"startDay: {start_day} - type: {type(start_day)}, now: {end_day} - type: {type(end_day)}")
+    """Lấy dữ liệu trung bình mỗi ngày từ start_day đến end_day (giờ Việt Nam - UTC+7)"""
+
+    # Vì đang hiểu truyền start với end là UTC+7 nên cần gán mark này để đảm bảo timezone là UTC+7
+    tz_utc_plus_7 = timezone(timedelta(hours=7))
+    if start_day.tzinfo is None:
+        start_day = start_day.replace(tzinfo=tz_utc_plus_7)
+    else:
+        start_day = start_day.astimezone(tz_utc_plus_7)
+
+    if end_day.tzinfo is None:
+        end_day = end_day.replace(tzinfo=tz_utc_plus_7)
+    else:
+        end_day = end_day.astimezone(tz_utc_plus_7)
+
+    # Chuyển sang UTC để truy vấn query từ MongoDB (nó đang ở UTC+0)
+    start_utc = start_day.astimezone(timezone.utc)
+    end_utc = end_day.astimezone(timezone.utc)
+
+    print(f"[DEBUG] Query từ {start_utc} đến {end_utc} (UTC)")
+
     pipeline = [
         {
             "$addFields": {
@@ -44,38 +62,54 @@ def get_history_environment_data(start_day, end_day):
         {
             "$match": {
                 "ts": {
-                    # "$gte": start_day.isoformat(),
-                    # "$lte": end_day.isoformat()
-                    "$gte": start_day,
-                    "$lte": end_day
+                    "$gte": start_utc,
+                    "$lte": end_utc
+                }
+            }
+        },
+        {
+            "$addFields": {
+                # Chuyển timestamp sang UTC+7 trước khi lấy ngày
+                "local_date": {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": {
+                            "$dateAdd": {
+                                "startDate": "$ts",
+                                "unit": "hour",
+                                "amount": 7
+                            }
+                        }
+                    }
                 }
             }
         },
         {
             "$group": {
-                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$ts"}},
-                "temperature": {"$avg": "$temperature"},
-                "humidity": {"$avg": "$humidity"},
-                "lux": {"$avg": "$lux"},
-                "soil_moisture": {"$avg": "$soil_moisture"}
+                "_id": "$local_date",
+                "temperature": { "$avg": "$temperature" },
+                "humidity": { "$avg": "$humidity" },
+                "lux": { "$avg": "$lux" },
+                "soil_moisture": { "$avg": "$soil_moisture" }
             }
         },
         {
-        "$project": {
-            "date": "$_id",
-            "temperature": 1,
-            "humidity": 1,
-            "lux": 1,
-            "soil_moisture": 1,
-            "_id": 0  
+            "$project": {
+                "date": "$_id",
+                "temperature": 1,
+                "humidity": 1,
+                "lux": 1,
+                "soil_moisture": 1,
+                "_id": 0
             }
         },
         {
-            "$sort": {"date": 1}
+            "$sort": { "date": 1 }
         }
     ]
+
     result = list(db[COLLECTION_NAME].aggregate(pipeline))
-    print(f"result la: {result}")
+
     result_dict = {
         item["date"]: {
             "temperature": item["temperature"],
@@ -84,17 +118,32 @@ def get_history_environment_data(start_day, end_day):
             "soil_moisture": item["soil_moisture"]
         } for item in result
     }
+
     return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}
 
 def get_hourly_environment_data(date):
-    """Lấy thông số môi trường của một khu vực theo từng giờ"""
+    """Lấy thông số môi trường theo từng giờ trong ngày, theo giờ UTC+7."""
+
+    # Vì đang hiểu truyền start với end là UTC+7 nên cần gán mark này để đảm bảo múi giờ UTC+7
+    tz_utc_plus_7 = timezone(timedelta(hours=7))
+
+    # Nếu không truyền ngày thì lấy thời điểm hiện tại ở UTC+7
     if date is None:
-        now = datetime.now(timezone.utc)
+        local_now = datetime.now(tz_utc_plus_7)
     else:
-        now = date.replace(hour=23, minute=59, second=59, microsecond=0)
-    print(f"now TIME: {now} - type: {type(now)}")
-    startDay = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"START TIME: {startDay} - type: {type(startDay)}")
+        # Ép ngày có timezone là UTC+7 nếu chưa có
+        local_now = date.astimezone(tz_utc_plus_7) if date.tzinfo else date.replace(tzinfo=tz_utc_plus_7)
+
+    # Tính thời điểm bắt đầu và kết thúc trong ngày (theo UTC+7)
+    local_end = local_now.replace(hour=23, minute=59, second=59, microsecond=0)
+    local_start = local_end.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Chuyển sang UTC để truy vấn query MongoDB
+    startDay = local_start.astimezone(timezone.utc)
+    endDay = local_end.astimezone(timezone.utc)
+
+    print(f"[DEBUG] Query MongoDB từ {startDay} đến {endDay} (theo UTC)")
+
     pipeline = [
         {
             "$addFields": {
@@ -111,36 +160,51 @@ def get_hourly_environment_data(date):
             "$match": {
                 "ts": {
                     "$gte": startDay,
-                    "$lt": now
+                    "$lt": endDay
+                }
+            }
+        },
+        {
+            "$addFields": {
+                # Tạo trường giờ theo UTC+7
+                "local_hour": {
+                    "$hour": {
+                        "$dateAdd": {
+                            "startDate": "$ts",
+                            "unit": "hour",
+                            "amount": 7
+                        }
+                    }
                 }
             }
         },
         {
             "$group": {
-                "_id": { "$hour": "$ts" },
+                "_id": "$local_hour",
                 "temperature": { "$avg": "$temperature" },
                 "humidity": { "$avg": "$humidity" },
                 "lux": { "$avg": "$lux" },
-                "soil_moisture": {"$avg": "$soil_moisture"}
+                "soil_moisture": { "$avg": "$soil_moisture" }
             }
         },
         {
-        "$project": {
-            "hour": "$_id",
-            "temperature": 1,
-            "humidity": 1,
-            "lux": 1,
-            "soil_moisture": 1,
-            "_id": 0  
+            "$project": {
+                "hour": "$_id",
+                "temperature": 1,
+                "humidity": 1,
+                "lux": 1,
+                "soil_moisture": 1,
+                "_id": 0
             }
         },
         {
-            "$sort": {"hour": 1}
+            "$sort": { "hour": 1 }
         }
     ]
 
     result = list(db[COLLECTION_NAME].aggregate(pipeline))
-    print(f"result la: {result}")
+
+    # Chuyển kết quả sang dạng dict lồng như yêu cầu
     result_dict = {
         str(item["hour"]): {
             "temperature": item["temperature"],
@@ -149,4 +213,5 @@ def get_hourly_environment_data(date):
             "soil_moisture": item["soil_moisture"]
         } for item in result
     }
+
     return jsonable_encoder(result_dict) if result else {"message": "Không tìm thấy dữ liệu"}

@@ -34,7 +34,7 @@ async def read_latest_environment_data(region: str):
         raise HTTPException(status_code=404, detail="Không tìm thấy dữ liệu")
     return data
 
-@router.put("/environment/set-threshold")
+@router.put("/set-threshold")
 async def api_set_threshold(request: en_threshold):
     set_threshold(request.name, request.minValue, request.maxValue)
     return {"message": "Threshold set", "name": request.name, "Min value": request.minValue, "Max value": request.maxValue,}

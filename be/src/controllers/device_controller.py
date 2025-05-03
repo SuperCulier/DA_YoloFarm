@@ -90,7 +90,7 @@ def get_device_logs(id: str):
     if device_logs:
         return transform_objectid(device_logs)
     else:
-        raise HTTPException(status_code=404, detail=f"Không tìm thấy thiết bị có id: '{id}'")
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy logs cho thiết bị có id: '{id}'")
 
 
 
