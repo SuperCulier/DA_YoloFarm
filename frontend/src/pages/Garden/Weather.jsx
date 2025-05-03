@@ -72,26 +72,44 @@ export default function Weather() {
     lux: "--",
     timestamp: "--:--",
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Define the refresh interval (3 minutes = 180000 milliseconds)
+  const REFRESH_INTERVAL = 150000;
 
   const updateWeatherData = async () => {
-    const data = await fetchLatestWeatherData();
-    if (data) {
-      setWeatherData({
-        temperature: data.temperature,
-        humidity: data.humidity,
-        soilMoisture: data.soilMoisture,
-        lux: data.lux,
-        timestamp: new Date(data.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        rawTimestamp: data.timestamp, // Add this line to include raw timestamp
-      });
+    setIsLoading(true);
+    try {
+      const data = await fetchLatestWeatherData();
+      if (data) {
+        setWeatherData({
+          temperature: data.temperature,
+          humidity: data.humidity,
+          soilMoisture: data.soilMoisture,
+          lux: data.lux,
+          timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          rawTimestamp: data.timestamp,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch weather data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     updateWeatherData();
+    // Set up automatic refresh interval (every 3 minutes)
+    const intervalId = setInterval(() => {
+      updateWeatherData();
+    }, REFRESH_INTERVAL);
+    
+    // Clean up the interval when component unmounts
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

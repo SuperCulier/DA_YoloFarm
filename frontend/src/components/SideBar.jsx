@@ -4,6 +4,7 @@ import {
   faUser,
   faScrewdriverWrench,
   faSun,
+  faGear
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/forest.png";
 import { useAuth } from "../AuthContext"; // Adjust path as needed
@@ -75,19 +76,33 @@ export default function SideBar() {
             </li>
             <li>
               <a
+                href="/setting"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              >
+                <FontAwesomeIcon
+                  icon={faGear}
+                  className="text-gray-600"
+                />
+                <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
+                  Cài đặt
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
                 href="#"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <FontAwesomeIcon icon={faUser} className="text-gray-600" />
                 <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
-                  {user?.username || "User"}
+                  Người dùng
                 </span>
               </a>
             </li>
             <li>
               <button
                 onClick={handleLogout}
-                className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-left"
               >
                 <FontAwesomeIcon
                   icon={faArrowRightFromBracket}

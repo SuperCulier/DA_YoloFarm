@@ -3,6 +3,7 @@ import ErrorPage from "./pages/Error.jsx";
 import Weather from "./pages/Garden/Weather.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
+import Setting from "./pages/Setting.jsx";
 import { createBrowserRouter, Navigate } from "react-router-dom"; // Add Navigate import
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -36,6 +37,11 @@ export const router = createBrowserRouter([
   {
     path: "/device",
     element: <ProtectedRouteWrapper element={<Device />} />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/setting",
+    element: <Setting />,
     errorElement: <ErrorPage />,
   },
 ]);
