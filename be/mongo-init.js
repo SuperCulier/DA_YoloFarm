@@ -82,8 +82,8 @@ db.environment_data.insertOne({
 */
 
 db.data_threshold.insertOne([
-  { name: "temperature", min: 20.0, max: 40.0},
-  { name: "humidity", min: 0.0, max: 50.0},
+  { name: "temperature", min: 0.0, max: 10.0},
+  { name: "humidity", min: 0.0, max: 0.5},
   { name: "lux", min: 0.0, max: 50.0},
   { name: "soil_moisture", min: 0.0, max: 50.0}
 ]);

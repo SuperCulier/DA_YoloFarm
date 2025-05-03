@@ -91,3 +91,14 @@
   Thêm api cài đặt ngưỡng.
   chuyển đổi múi giờ trước khi lưu vào database
   đang fix bật tắt tự động {vẫn chưa chạy được}
+
+  {
+    "message": "Dữ liệu đã được cập nhật",
+    "data": {
+        "temperature": 25.8,
+        "humidity": 53.6,
+        "lux": 71.0,
+        "soil_moisture": 0.0,
+        "timestamp": "2025-04-28T15:25:01"
+    }
+}
