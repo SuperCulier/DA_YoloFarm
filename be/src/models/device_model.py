@@ -14,4 +14,4 @@ class Device(BaseModel):
     status: Optional[bool] = False  # Mặc định thiết bị tắt
 
 class Device_auto(BaseModel):
-    status: int
+    value: int

@@ -1,30 +1,17 @@
 from fastapi import APIRouter, HTTPException
 from ..controllers.device_controller import add_device, get_device, update_device, delete_device, control_device, log_device_action, get_device_logs, get_all_devices, run_auto_mode
-from src.models.device_model import Device, control_model, log_device, Device_auto
+from src.models.device_model import control_model, log_device, Device_auto
 from src.controllers.ai_controller import predict_from_model
 from src.services.adafruit_service import show_value
-from src.config.settings import status
+import src.config.settings as config
 import asyncio
+import logging
 #from src.services.adafruit_service import show_value
 
-"""
-router = APIRouter(prefix="/device", tags=["Device"])
-@router.post("/")
-def create_device(device: Device):
-    return add_device(device)
 
-@router.get("/{device_id}")
-def read_device(device_id: str):
-    return get_device(device_id)
-
-@router.put("/{device_id}")
-def modify_device(device_id: str, update_data: dict):
-    return update_device(device_id, update_data)
-
-@router.delete("/{device_id}")
-def remove_device(device_id: str):
-    return delete_device(device_id)
- """
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+status_lock = asyncio.Lock()
 
 router = APIRouter()
 feed = ["button-fan", "button-pump"]
@@ -44,31 +31,32 @@ def api_control_device(request: control_model):
     if control_device(feed_key, value):
         action = "on" if value == 1 else "off"
         log_device_action(id, action)
-        status = "bật" if value == 1 else "tắt"
-        return {"message": f"Đã {status} thiết bị {id}"}
+        res = "bật" if value == 1 else "tắt"
+        return {"message": f"Đã {res} thiết bị {id}"}
     else:
         raise HTTPException(status_code=500, detail=f"Không thể điều khiển thiết bị {id}")
 
 # Router để bật/tắt chế độ tự động
 @router.post("/device/control/auto")
 async def control_device_auto(request: Device_auto):
-    global status
+    async with status_lock:
+        if request.value == 1:
+            if config.status == 0:
+                config.status = 1
+                asyncio.create_task(run_auto_mode())
+                logger.info("Auto mode enabled by request.")
+                return {"message": "Chế độ tự động đã được bật."}
+            else:
+                logger.info("Auto mode enable request ignored (already active).")
+                return {"message": "Chế độ tự động đã được bật từ trước."}
 
-    # Nếu yêu cầu bật chế độ auto (status == 1)
-    if request.status == 1:
-        if status == 0:  # Nếu chế độ auto chưa bật, thì bắt đầu vòng lặp
-            status = 1
-            asyncio.create_task(run_auto_mode())  # Bắt đầu chạy task bất đồng bộ
-            return {"message": "Chế độ tự động đã được bật."}
-        else:
-            return {"message": "Chế độ tự động đã được bật."}
+        elif request.value == 0:
+            config.status = 0
+            logger.info("Auto mode disabled by request.")
+            return {"message": "Chế độ tự động đã được tắt."}
 
-    # Nếu yêu cầu tắt chế độ auto (status == 0)
-    elif request.status == 0:
-        status = 0  # Tắt chế độ auto
-        return {"message": "Chế độ tự động đã được tắt."}
+        return {"message": "Trạng thái không hợp lệ. Chỉ chấp nhận giá trị status=0 hoặc status=1."}
 
-    return {"message": "Trạng thái không hợp lệ. Chỉ chấp nhận giá trị status=0 hoặc status=1."}
 
 @router.get("/ai")
 async def testAi():

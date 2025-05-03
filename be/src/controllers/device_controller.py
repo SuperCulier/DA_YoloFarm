@@ -4,13 +4,18 @@ from src.services.adafruit_service import show_value
 import requests
 from datetime import datetime, timezone
 from fastapi import HTTPException
-from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY,status
+from src.config.settings import ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY
+import src.config.settings as config
 from src.controllers.ai_controller import predict_from_model
 import asyncio
+import logging
 
 print("Debug: device_controller.py loaded")
 print("Available functions in device_controller:", dir())
 feed = ["button-fan", "button-pump"]
+status_lock = asyncio.Lock()
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 DEVICE_LOGS_COLLECTION = "device_logs"
 #hàm bật tắt thiết bị
@@ -56,13 +61,18 @@ async def control_devices_based_on_prediction(temp, humid):
 
 
 async def run_auto_mode():
-    global status
-    while status == 1:
-        input_data = await show_value()
-        temperature = input_data.get("temperature")
-        humidity = input_data.get("humidity")
-        await control_devices_based_on_prediction(temperature, humidity)
-        await asyncio.sleep(5)
+    logger.info("Auto mode task started.")
+    try:
+        while config.status == 1:
+            logger.info("Auto mode is running...")  # Đây là log bạn muốn xem trên Docker logs
+            input_data = await show_value()
+            temperature = input_data.get("temperature")
+            humidity = input_data.get("humidity")
+            await control_devices_based_on_prediction(temperature, humidity)
+            await asyncio.sleep(5)
+        logger.info("Auto mode task stopped (status = 0).")
+    except Exception as e:
+        logger.error(f"run_auto_mode crashed: {e}")
 
 
 # ghi lại lịch sử bật tắt vào từng colection
