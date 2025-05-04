@@ -22,9 +22,9 @@ async def fetch_data_api():
 
         
 @router.get("/show-last-data")
-def get_latest_data():
+async def get_latest_data():
     """API lấy bộ thông số môi trường mới nhất từ database"""
-    return show_value()
+    return await show_value()
 
 # WebSocket dùng để gửi cãnh báo.
 @router.websocket("/ws/alerts")
