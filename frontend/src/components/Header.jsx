@@ -6,14 +6,80 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
   faArrowRightFromBracket,
+  faBell,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { GET_THRESHOLD_ALERT_API } from "../apis/apis";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
   const { isLoggedIn, logout, user } = useAuth();
+  const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const [wsError, setWsError] = useState(null);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    let socket;
+    let retryCount = 0;
+    const maxRetries = 5;
+    const retryDelay = 5000;
+
+    const connectWebSocket = () => {
+      socket = new WebSocket(GET_THRESHOLD_ALERT_API);
+
+      socket.onopen = () => {
+        console.log("WebSocket connection opened");
+        setWsError(null);
+        retryCount = 0;
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === "alert") {
+            console.log("Received alert:", message.data);
+            setUnreadCount((prev) => prev + 1);
+          }
+        } catch (e) {
+          console.error("Invalid message:", event.data, e);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error, "URL:", GET_THRESHOLD_ALERT_API);
+        setWsError("Failed to connect to alert service. Retrying...");
+      };
+
+      socket.onclose = (event) => {
+        console.log("WebSocket closed:", { code: event.code, reason: event.reason });
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
+          setTimeout(connectWebSocket, retryDelay);
+        } else {
+          setWsError("Unable to connect to alerts. Please try again later.");
+        }
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (socket) socket.close();
+    };
+  }, [isLoggedIn]);
 
   const handleLogout = () => {
     logout();
-    // Protected routes will automatically redirect
+  };
+
+  const handleNotificationClick = () => {
+    navigate("/user");
+    setUnreadCount(0);
   };
 
   return (
@@ -28,8 +94,19 @@ export default function Header() {
           </Link>
           <div className="flex items-center lg:order-2">
             {isLoggedIn ? (
-              <div className="flex items-center">
-                <FontAwesomeIcon icon={faUser} className="text-gray-600" />
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={handleNotificationClick}
+                  className="relative flex items-center p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                >
+                  <FontAwesomeIcon icon={faBell} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                {/* <FontAwesomeIcon icon={faUser} className="text-gray-600" /> */}
                 <button
                   onClick={handleLogout}
                   className="flex items-center w-full p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"

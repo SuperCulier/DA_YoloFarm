@@ -16,4 +16,6 @@ export const GET_WEATHER_HOURLY_API = `${BASE_URL}/environment/hourlyData`;
 
 export const GET_WEATHER_DAILY_API = `${BASE_URL}/environment/historyData`;
 
-export const SET_THRESHOLD_API = `${BASE_URL}/environment/set-threshold`
+export const SET_THRESHOLD_API = `${BASE_URL}/environment/set-threshold`;
+
+export const GET_THRESHOLD_ALERT_API = `ws://localhost:8000/ws/alerts`;

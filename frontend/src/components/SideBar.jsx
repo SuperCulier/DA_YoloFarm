@@ -4,19 +4,90 @@ import {
   faUser,
   faScrewdriverWrench,
   faSun,
-  faGear
+  faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import logo from "../assets/forest.png";
-import { useAuth } from "../AuthContext"; // Adjust path as needed
+import { useAuth } from "../AuthContext";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GET_THRESHOLD_ALERT_API } from "../apis/apis";
 
 export default function SideBar() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const [wsError, setWsError] = useState(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let socket;
+    let retryCount = 0;
+    const maxRetries = 5;
+    const retryDelay = 5000;
+
+    const connectWebSocket = () => {
+      socket = new WebSocket(GET_THRESHOLD_ALERT_API);
+
+      socket.onopen = () => {
+        console.log("WebSocket connection opened");
+        setWsError(null);
+        retryCount = 0;
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === "alert") {
+            console.log("Received alert:", message.data);
+            setUnreadCount((prev) => prev + 1);
+          }
+        } catch (e) {
+          console.error("Invalid message:", event.data, e);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error(
+          "WebSocket error:",
+          error,
+          "URL:",
+          GET_THRESHOLD_ALERT_API
+        );
+        setWsError("Failed to connect to alert service. Retrying...");
+      };
+
+      socket.onclose = (event) => {
+        console.log("WebSocket closed:", {
+          code: event.code,
+          reason: event.reason,
+        });
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
+          setTimeout(connectWebSocket, retryDelay);
+        } else {
+          setWsError("Unable to connect to alerts. Please try again later.");
+        }
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (socket) socket.close();
+    };
+  }, [user]);
 
   const handleLogout = () => {
     logout();
-    navigate("/login"); // Redirect to login page after logout
+    navigate("/login");
+  };
+
+  const handleUserClick = () => {
+    navigate("/user");
+    setUnreadCount(0);
   };
 
   return (
@@ -79,25 +150,27 @@ export default function SideBar() {
                 href="/setting"
                 className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
-                <FontAwesomeIcon
-                  icon={faGear}
-                  className="text-gray-600"
-                />
+                <FontAwesomeIcon icon={faGear} className="text-gray-600" />
                 <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
                   Cài đặt
                 </span>
               </a>
             </li>
             <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              <button
+                onClick={handleUserClick}
+                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group w-full text-left"
               >
                 <FontAwesomeIcon icon={faUser} className="text-gray-600" />
                 <span className="flex-1 ms-3 whitespace-nowrap text-gray-700">
                   Người dùng
                 </span>
-              </a>
+                {unreadCount > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
             </li>
             <li>
               <button

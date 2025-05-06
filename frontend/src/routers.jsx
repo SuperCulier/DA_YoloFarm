@@ -4,6 +4,7 @@ import Weather from "./pages/Garden/Weather.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Setting from "./pages/Setting.jsx";
+import User from "./pages/User.jsx";
 import { createBrowserRouter, Navigate } from "react-router-dom"; // Add Navigate import
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -42,6 +43,11 @@ export const router = createBrowserRouter([
   {
     path: "/setting",
     element: <Setting />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/user",
+    element: <User />,
     errorElement: <ErrorPage />,
   },
 ]);

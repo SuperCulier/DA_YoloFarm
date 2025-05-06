@@ -22,7 +22,7 @@ export default function Login() {
       login(username);
 
       // Show success message
-      alert("Đăng nhập thành công ✅");
+      // alert("Đăng nhập thành công ✅");
 
       // Use navigate after login is complete
       navigate("/home");
