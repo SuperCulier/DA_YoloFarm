@@ -40,7 +40,7 @@ async def api_set_threshold(request: en_threshold):
     return {"message": "Threshold set", "name": request.name, "Min value": request.minValue, "Max value": request.maxValue,}
 
 
-@router.get("/historyData")
+@router.post("/historyData")
 # async def read_history(start_day, end_day):
 async def read_history(r: HistoryRequest):
     """ API để lấy dữ liệu trung bình mỗi ngày theo region, trong khoảng tgian start_dat đến end_day"""
@@ -58,7 +58,7 @@ async def read_history(r: HistoryRequest):
         raise HTTPException(status_code=404, detail="Không có dữ liệu trong khoảng thời gian này")
     return data
 
-@router.get("/hourlyData")
+@router.post("/hourlyData")
 # async def read_hourly(date=None):
 async def read_hourly(r: HourlyRequest):
     """date = None là lấy dữ liệu ngày hôm nay"""
