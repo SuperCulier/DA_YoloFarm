@@ -205,7 +205,7 @@ export default function Setting() {
                 <input
                   type="range"
                   min="0"
-                  max="2000"
+                  max="100"
                   value={luxMin}
                   onChange={(e) => handleMinMax(setLuxMin, setLuxMax, luxMin, luxMax, Number(e.target.value), true)}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-500"
@@ -219,7 +219,7 @@ export default function Setting() {
                 <input
                   type="range"
                   min="0"
-                  max="2000"
+                  max="100"
                   value={luxMax}
                   onChange={(e) => handleMinMax(setLuxMin, setLuxMax, luxMin, luxMax, Number(e.target.value), false)}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-500"

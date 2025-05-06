@@ -1,67 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import ApexCharts from "apexcharts";
-import { getWeatherHourly } from "../apis/WeatherAPI.js"; // Adjust the import path
 
-export default function Chart({ weatherData, selectedTab }) {
-  const [chartData, setChartData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function Chart({ weatherData, selectedTab, chartData }) {
   const chartRef = useRef(null);
-
-  const fetchData = async () => {
-    if (!weatherData.rawTimestamp) return;
-
-    try {
-      const baseDate = new Date(weatherData.rawTimestamp);
-      let startDateStr;
-
-      // Adjust the date range based on the selected tab
-      if (selectedTab === "Ngày") {
-        startDateStr = baseDate.toISOString().split("T")[0] + "T00:00:00";
-      } else if (selectedTab === "Tuần") {
-        const startOfWeek = new Date(baseDate);
-        startOfWeek.setDate(baseDate.getDate() - baseDate.getDay());
-        startDateStr = startOfWeek.toISOString().split("T")[0] + "T00:00:00";
-      } else if (selectedTab === "Tháng") {
-        const startOfMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
-        startDateStr = startOfMonth.toISOString().split("T")[0] + "T00:00:00";
-      }
-
-      const data = await getWeatherHourly(startDateStr);
-
-      if (data) {
-        console.log("Fetched hourly data for chart:", data);
-        const processedData = Object.entries(data).map(([hour, values]) => {
-          const timestamp = new Date(startDateStr);
-          timestamp.setHours(parseInt(hour), 0, 0, 0);
-          return {
-            timestamp: timestamp.toISOString(),
-            temperature: values.temperature,
-            humidity: values.humidity,
-            soilMoisture: values.soil_moisture,
-            lux: values.lux,
-          };
-        });
-
-        setChartData((prevData) => {
-          const existingTimestamps = new Set(prevData.map((point) => point.timestamp));
-          const newDataPoints = processedData.filter(
-            (point) => !existingTimestamps.has(point.timestamp)
-          );
-          return [...prevData, ...newDataPoints];
-        });
-      } else {
-        console.log("No data returned from getWeatherHourly");
-      }
-    } catch (error) {
-      console.error("Failed to fetch hourly chart data:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (weatherData.rawTimestamp) {
-      fetchData().then(() => setIsLoading(false));
-    }
-  }, [weatherData, selectedTab]); // Re-fetch when weatherData or selectedTab changes
 
   useEffect(() => {
     const options = {
@@ -106,28 +47,63 @@ export default function Chart({ weatherData, selectedTab }) {
       legend: { show: true, position: "top" },
       xaxis: {
         type: "datetime",
-        min: selectedTab === "Ngày"
-          ? weatherData.rawTimestamp
-            ? new Date(weatherData.rawTimestamp).setHours(0, 0, 0, 0)
-            : new Date().setHours(0, 0, 0, 0)
-          : selectedTab === "Tuần"
-          ? weatherData.rawTimestamp
-            ? new Date(new Date(weatherData.rawTimestamp).setDate(new Date(weatherData.rawTimestamp).getDate() - new Date(weatherData.rawTimestamp).getDay())).setHours(0, 0, 0, 0)
-            : new Date(new Date().setDate(new Date().getDate() - new Date().getDay())).setHours(0, 0, 0, 0)
-          : weatherData.rawTimestamp
-          ? new Date(new Date(weatherData.rawTimestamp).getFullYear(), new Date(weatherData.rawTimestamp).getMonth(), 1).setHours(0, 0, 0, 0)
-          : new Date(new Date().getFullYear(), new Date().getMonth(), 1).setHours(0, 0, 0, 0),
-        max: selectedTab === "Ngày"
-          ? weatherData.rawTimestamp
-            ? new Date(weatherData.rawTimestamp).setHours(23, 59, 59, 999)
-            : new Date().setHours(23, 59, 59, 999)
-          : selectedTab === "Tuần"
-          ? weatherData.rawTimestamp
-            ? new Date(new Date(weatherData.rawTimestamp).setDate(new Date(weatherData.rawTimestamp).getDate() - new Date(weatherData.rawTimestamp).getDay() + 6)).setHours(23, 59, 59, 999)
-            : new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 6)).setHours(23, 59, 59, 999)
-          : weatherData.rawTimestamp
-          ? new Date(new Date(weatherData.rawTimestamp).getFullYear(), new Date(weatherData.rawTimestamp).getMonth() + 1, 0).setHours(23, 59, 59, 999)
-          : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).setHours(23, 59, 59, 999),
+        min:
+          selectedTab === "Ngày"
+            ? chartData.length
+              ? new Date(chartData[0].timestamp).setUTCHours(0, 0, 0, 0) // Use UTC
+              : new Date().setUTCHours(0, 0, 0, 0)
+            : selectedTab === "Tuần"
+            ? weatherData.rawTimestamp
+              ? new Date(
+                  new Date(weatherData.rawTimestamp).setDate(
+                    new Date(weatherData.rawTimestamp).getDate() -
+                      new Date(weatherData.rawTimestamp).getDay()
+                  )
+                ).setHours(0, 0, 0, 0)
+              : new Date(
+                  new Date().setDate(new Date().getDate() - new Date().getDay())
+                ).setHours(0, 0, 0, 0)
+            : weatherData.rawTimestamp
+            ? new Date(
+                new Date(weatherData.rawTimestamp).getFullYear(),
+                new Date(weatherData.rawTimestamp).getMonth(),
+                1
+              ).setHours(0, 0, 0, 0)
+            : new Date(
+                new Date().getFullYear(),
+                new Date().getMonth(),
+                1
+              ).setHours(0, 0, 0, 0),
+        max:
+          selectedTab === "Ngày"
+            ? chartData.length
+              ? new Date(chartData[0].timestamp).setUTCHours(23, 59, 59, 999) // Use UTC
+              : new Date().setUTCHours(23, 59, 59, 999)
+            : selectedTab === "Tuần"
+            ? weatherData.rawTimestamp
+              ? new Date(
+                  new Date(weatherData.rawTimestamp).setDate(
+                    new Date(weatherData.rawTimestamp).getDate() -
+                      new Date(weatherData.rawTimestamp).getDay() +
+                      6
+                  )
+                ).setHours(23, 59, 59, 999)
+              : new Date(
+                  new Date().setDate(
+                    new Date().getDate() - new Date().getDay() + 6
+                  )
+                ).setHours(23, 59, 59, 999)
+            : weatherData.rawTimestamp
+            ? new Date(
+                new Date(weatherData.rawTimestamp).getFullYear(),
+                new Date(weatherData.rawTimestamp).getMonth() + 1,
+                0
+              ).setHours(23, 59, 59, 999)
+            : new Date(
+                new Date().getFullYear(),
+                new Date().getMonth() + 1,
+                0
+              ).setHours(23, 59, 59, 999),
         labels: {
           datetimeFormatter: {
             hour: "HH:mm",
@@ -137,15 +113,16 @@ export default function Chart({ weatherData, selectedTab }) {
           formatter: (value) => {
             const date = new Date(value);
             if (selectedTab === "Ngày") {
-              return date.getHours() + "h";
+              return date.getUTCHours() + "h"; // Use UTC hours to match timestamps
             } else if (selectedTab === "Tuần") {
-              return date.getDate() + "/" + (date.getMonth() + 1);
+              return date.getUTCDate() + "/" + (date.getUTCMonth() + 1);
             } else {
-              return date.getDate() + "/" + (date.getMonth() + 1);
+              return date.getUTCDate() + "/" + (date.getUTCMonth() + 1);
             }
           },
         },
-        tickAmount: selectedTab === "Ngày" ? 12 : selectedTab === "Tuần" ? 7 : 10,
+        tickAmount:
+          selectedTab === "Ngày" ? 12 : selectedTab === "Tuần" ? 7 : 10,
       },
       yaxis: {
         labels: {
@@ -168,7 +145,7 @@ export default function Chart({ weatherData, selectedTab }) {
         chart.destroy();
       };
     }
-  }, [weatherData, selectedTab]);
+  }, [weatherData, selectedTab, chartData]); // Include chartData in dependencies
 
   useEffect(() => {
     if (!chartData || chartData.length === 0 || !chartRef.current) return;
@@ -207,14 +184,6 @@ export default function Chart({ weatherData, selectedTab }) {
     console.log("Updating chart with series data:", seriesData);
     chartRef.current.updateSeries(seriesData, true);
   }, [chartData]);
-
-  if (isLoading) {
-    return <div className="text-center text-gray-500 dark:text-gray-400">Đang tải dữ liệu...</div>;
-  }
-
-  if (!chartData || chartData.length === 0) {
-    return <div className="text-center text-gray-500 dark:text-gray-400">Không có dữ liệu để hiển thị</div>;
-  }
 
   return <div id="line-chart" className="w-full h-full"></div>;
 }
