@@ -48,11 +48,13 @@ async def get_value():
         else:
             result[key] = None
 
+    """
     if latest_timestamp:
         vn_time = latest_timestamp.astimezone(vietnam_tz)
         result["timestamp"] = vn_time.strftime("%Y-%m-%dT%H:%M:%S")
     else:
         result["timestamp"] = None
+    """
     return result
 
 
@@ -94,11 +96,23 @@ async def update_environment_data(notify_callback=None):
 
 
 async def show_value():
-    """Trả về dữ liệu JSON gồm 1 timestamp duy nhất và các thông số đo được từ MongoDB."""
     latest_data = find_one_latest(COLLECTION_NAME)
 
     if latest_data:
-        latest_data["_id"] = str(latest_data["_id"])  # Chuyển ObjectId thành chuỗi JSON
+        latest_data["_id"] = str(latest_data["_id"])
+
+        ts = latest_data.get("timestamp")
+        if isinstance(ts, str):
+            try:
+                ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))  # Convert từ chuỗi ISO sang datetime
+            except ValueError:
+                print("❌ Không thể chuyển timestamp từ chuỗi:", ts)
+                return latest_data
+        if isinstance(ts, datetime):
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            vn_time = ts.astimezone(vietnam_tz)
+            latest_data["timestamp"] = vn_time.strftime("%Y-%m-%dT%H:%M:%S")
         return latest_data
     else:
         return {"message": "Không tìm thấy dữ liệu"}

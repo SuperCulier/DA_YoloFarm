@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 DEVICE_LOGS_COLLECTION = "device_logs"
+DEVICE_COLECTION = "devices"
 #hàm bật tắt thiết bị
 def control_device(feed_key: str, value: int):
     if value not in (0, 1):
@@ -77,20 +78,32 @@ async def run_auto_mode():
 
 # ghi lại lịch sử bật tắt vào từng colection
 def log_device_action(id: str, action: str):
-    # Tìm thiết bị theo id trong DB
+    # Tìm thiết bị theo id
     device = find_one("devices", {"id": id})
-
     if not device:
         raise HTTPException(status_code=404, detail=f"Không tìm thấy thiết bị với id: {id}")
 
+    # Chuyển đổi hành động sang trạng thái
+    status = None
+    if action.lower() == "on":
+        status = "on"
+    elif action.lower() == "off":
+        status = "off"
+    else:
+        raise HTTPException(status_code=400, detail="Hành động không hợp lệ. Chỉ chấp nhận 'on' hoặc 'off'.")
+
+    # Cập nhật trạng thái thiết bị
+    update_one(DEVICE_COLECTION, {"id": id}, {"status": status})
+
+    # Ghi log hoạt động
     log_data = {
         "id": id,
-        "device_name": device["name"],  # Lấy tên thiết bị từ DB
-        "action": action,
+        "device_name": device["name"],
+        "action": status,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-
     insert_one(DEVICE_LOGS_COLLECTION, log_data)
+
 
 
 
@@ -103,26 +116,23 @@ def get_device_logs(id: str):
         raise HTTPException(status_code=404, detail=f"Không tìm thấy logs cho thiết bị có id: '{id}'")
 
 
-
-###########################
 COLLECTION_NAME = "devices"
 def add_device(device: Device):
-    existing_device = find_one(COLLECTION_NAME, {"name": device.name})
+    existing_device = find_one(DEVICE_COLECTION, {"name": device.name})
     if existing_device:
         return {"error": "Device already exists"}
-    return insert_one(COLLECTION_NAME, device.dict())
+    return insert_one(DEVICE_COLECTION, device.dict())
 
 def get_device(name: str):
-    return find_one(COLLECTION_NAME, {"device_name": name})
+    return find_one(DEVICE_COLECTION, {"device_name": name})
 
 def get_all_devices():
-    raw_data = find_all(COLLECTION_NAME)
+    raw_data = find_all(DEVICE_COLECTION)
     return transform_objectid(raw_data)
 
 def update_device(device_id: str, update_data: dict):
-    return update_one(COLLECTION_NAME, {"_id": device_id}, update_data)
+    return update_one(DEVICE_COLECTION, {"_id": device_id}, update_data)
 
 def delete_device(device_id: str):
-    return delete_one(COLLECTION_NAME, {"_id": device_id})
-
+    return delete_one(DEVICE_COLECTION, {"_id": device_id})
 
