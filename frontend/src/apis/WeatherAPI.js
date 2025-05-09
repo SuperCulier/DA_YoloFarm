@@ -11,13 +11,13 @@ export const fetchLatestWeatherData = async () => {
     console.log(response);
 
     const data = response.data;
-
+    console.log("Latest weather data:", data);
     return {
       temperature: data.temperature,
       humidity: data.humidity,
-      soilMoisture: data.soil_moisture,
+      soil_moisture: data.soil_moisture,
       lux: data.lux,
-      timestamp: data.timestamp,
+      // timestamp: data.timestamp,
     };
   } catch (error) {
     console.error("Error fetching weather data:", error.message);

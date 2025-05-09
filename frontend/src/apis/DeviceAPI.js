@@ -58,7 +58,7 @@ export const controlDevice = async (deviceId, value) => {
 export const setControlMode = async (value) => {
   try {
     const response = await axios.post(SET_CONTROL_MODE_API, {
-      status: value,
+      value: value,
     })
     console.log(`Control mode ${value} response:`, response.status);
     return response.status === 200;

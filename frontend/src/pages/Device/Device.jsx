@@ -4,7 +4,12 @@ import DeviceInfo from "./DeviceInfo.jsx";
 import { useState, useEffect } from "react";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getDeviceList, getDeviceLog, controlDevice, setControlMode } from "../../apis/DeviceAPI.js";
+import {
+  getDeviceList,
+  getDeviceLog,
+  controlDevice,
+  setControlMode,
+} from "../../apis/DeviceAPI.js";
 
 const DeviceList = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
@@ -13,7 +18,14 @@ const DeviceList = () => {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAutoMode, setIsAutoMode] = useState(false);
+  const [isAutoMode, setIsAutoMode] = useState(() => {
+    const savedMode = localStorage.getItem("isAutoMode");
+    return savedMode ? JSON.parse(savedMode) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isAutoMode", JSON.stringify(isAutoMode));
+  }, [isAutoMode]);
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -22,14 +34,14 @@ const DeviceList = () => {
         console.log("Fetching device list...");
         const deviceList = await getDeviceList();
         console.log("Device list received:", deviceList);
-        
+
         const formattedDevices = deviceList.map((device) => ({
           id: device.deviceId,
           name: device.name,
           location: "Vườn 1",
           status: device.status === "on" ? "Run" : "Inactive",
         }));
-        
+
         setDevices(formattedDevices);
         setLoading(false);
       } catch (err) {
@@ -38,8 +50,19 @@ const DeviceList = () => {
         setLoading(false);
       }
     };
-    
+
     fetchDevices();
+
+    // useEffect(() => {
+    //   // Gọi fetchDevices lần đầu
+    //   fetchDevices();
+
+    //   // Thiết lập interval để gọi fetchDevices mỗi 3 phút (180000ms)
+    //   const intervalId = setInterval(fetchDevices, 300000);
+
+    //   // Dọn dẹp interval khi component unmount
+    //   return () => clearInterval(intervalId);
+    // });
   }, []);
 
   const fetchDeviceHistory = async (deviceId) => {
@@ -54,9 +77,12 @@ const DeviceList = () => {
       }
       setSelectedDevice(selected);
       setShowDeviceInfo(true);
-      setError(null); 
+      setError(null);
     } catch (err) {
-      console.error(`Error fetching history for device ${deviceId}:`, err.message);
+      console.error(
+        `Error fetching history for device ${deviceId}:`,
+        err.message
+      );
       setError(`Không thể tải lịch sử thiết bị ${deviceId}: ${err.message}`);
     }
   };
@@ -69,16 +95,16 @@ const DeviceList = () => {
 
     const originalDevices = [...devices];
     const newDevices = devices.map((d) =>
-      d.id === device.id
-        ? { ...d, status: newStatus ? "Run" : "Inactive" }
-        : d
+      d.id === device.id ? { ...d, status: newStatus ? "Run" : "Inactive" } : d
     );
     setDevices(newDevices);
 
     try {
       const value = newStatus ? 1 : 0;
       await controlDevice(device.id, value);
-      console.log(`Device ${device.id} toggled to ${newStatus ? "Bật" : "Tắt"}`);
+      console.log(
+        `Device ${device.id} toggled to ${newStatus ? "Bật" : "Tắt"}`
+      );
     } catch (err) {
       setDevices(originalDevices);
       setError(`Không thể điều khiển thiết bị ${device.name}: ${err.message}`);
@@ -107,25 +133,39 @@ const DeviceList = () => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold">Danh sách thiết bị</h2>
-            
+
             <div className="flex items-center bg-gray-100 p-2 rounded-lg">
-              <span className={`px-2 text-sm font-medium ${!isAutoMode ? "text-blue-600 font-bold" : "text-gray-500"}`}>
+              <span
+                className={`px-2 text-sm font-medium ${
+                  !isAutoMode ? "text-blue-600 font-bold" : "text-gray-500"
+                }`}
+              >
                 Thủ công
               </span>
-              <Switch 
-                checked={isAutoMode} 
+              <Switch
+                checked={isAutoMode}
                 onCheckedChange={handleControlModeToggle}
               />
-              <span className={`px-2 text-sm font-medium ${isAutoMode ? "text-green-600 font-bold" : "text-gray-500"}`}>
+              <span
+                className={`px-2 text-sm font-medium ${
+                  isAutoMode ? "text-green-600 font-bold" : "text-gray-500"
+                }`}
+              >
                 Tự động
               </span>
             </div>
           </div>
         </div>
 
-        <div className={`p-3 mb-4 rounded-md ${isAutoMode ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"}`}>
+        <div
+          className={`p-3 mb-4 rounded-md ${
+            isAutoMode
+              ? "bg-green-50 text-green-700"
+              : "bg-blue-50 text-blue-700"
+          }`}
+        >
           <p>
-            {isAutoMode 
+            {isAutoMode
               ? "Chế độ tự động đang kích hoạt. Các thiết bị sẽ được điều khiển tự động và không thể điều khiển thủ công."
               : "Chế độ thủ công đang kích hoạt. Bạn có thể điều khiển trực tiếp các thiết bị."}
           </p>
@@ -136,7 +176,7 @@ const DeviceList = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
           </div>
         )}
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -166,16 +206,20 @@ const DeviceList = () => {
                       <td className="p-3">
                         <span
                           className={`px-3 py-1 rounded-full text-white text-xs ${
-                            device.status === "Run" ? "bg-green-500" : "bg-red-500"
+                            device.status === "Run"
+                              ? "bg-green-500"
+                              : "bg-red-500"
                           }`}
                         >
                           {device.status}
                         </span>
                       </td>
                       <td className="p-3">
-                        <Switch 
-                          checked={device.status === "Run"} 
-                          onCheckedChange={(checked) => handleDeviceToggle(device, checked)}
+                        <Switch
+                          checked={device.status === "Run"}
+                          onCheckedChange={(checked) =>
+                            handleDeviceToggle(device, checked)
+                          }
                           disabled={isAutoMode}
                         />
                       </td>
@@ -191,7 +235,9 @@ const DeviceList = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="p-4 text-center">No devices found</td>
+                    <td colSpan="6" className="p-4 text-center">
+                      No devices found
+                    </td>
                   </tr>
                 )}
               </tbody>

@@ -33,7 +33,7 @@ const CombinedWeatherCard = ({ data }) => {
             <FontAwesomeIcon icon={faLocationDot} />
             <span>Vườn nhà</span>
           </div>
-          <div>Cập nhật lúc {data.timestamp}</div>
+          {/* <div>Cập nhật lúc {data.timestamp}</div> */}
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default function Weather() {
     humidity: "--",
     soilMoisture: "--",
     lux: "--",
-    timestamp: "--:--",
+    // timestamp: "--:--",
     rawTimestamp: null,
   });
   const [chartData, setChartData] = useState([]);
@@ -97,15 +97,15 @@ export default function Weather() {
         setWeatherData({
           temperature: weatherResponse.temperature,
           humidity: weatherResponse.humidity,
-          soilMoisture: weatherResponse.soilMoisture,
+          soilMoisture: weatherResponse.soil_moisture,
           lux: weatherResponse.lux,
-          timestamp: new Date(
-            weatherResponse.timestamp.replace(/Z$/, "")
-          ).toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }),
+          // timestamp: new Date(
+          //   weatherResponse.timestamp.replace(/Z$/, "")
+          // ).toLocaleTimeString("en-US", {
+          //   hour: "2-digit",
+          //   minute: "2-digit",
+          //   hour12: false,
+          // }),
           rawTimestamp: weatherResponse.timestamp,
         });
       }

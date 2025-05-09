@@ -1,5 +1,5 @@
 from fastapi import APIRouter, WebSocket
-from src.services.adafruit_service import update_environment_data, show_value
+from src.services.adafruit_service import update_environment_data, get_value
 import asyncio
 
 router = APIRouter()
@@ -24,7 +24,7 @@ async def fetch_data_api():
 @router.get("/show-last-data")
 async def get_latest_data():
     """API lấy bộ thông số môi trường mới nhất từ database"""
-    return await show_value()
+    return await get_value()
 
 # WebSocket dùng để gửi cãnh báo.
 @router.websocket("/ws/alerts")
