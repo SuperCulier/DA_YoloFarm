@@ -16,7 +16,7 @@ db.devices.insertMany([
 
 
 
-db.data_threshold.insertOne([
+db.data_threshold.insertMany([
   { name: "temperature", min: 0.0, max: 10.0},
   { name: "humidity", min: 0.0, max: 0.5},
   { name: "lux", min: 0.0, max: 50.0},
@@ -66,3 +66,6 @@ db.data_threshold.insertOne([
 
 // // Lưu dữ liệu vào collection 'environment_data'
 // db.environment_data.insertMany(data);
+
+
+

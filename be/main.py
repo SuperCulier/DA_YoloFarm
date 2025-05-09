@@ -5,11 +5,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.routers import device, environment, adafruit, auth
-from src.startup import seed_admin_user
+from src.startup import seed_admin_user, periodic_update
+
+seed_admin_user()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # (Có thể để trống nếu dùng WebSocket để kiểm tra định kỳ)
+    asyncio.create_task(periodic_update())
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -24,7 +26,7 @@ app.add_middleware(
 )
 
 # Tạo admin mặc định
-seed_admin_user()
+# seed_admin_user()
 
 # Đăng ký các router
 app.include_router(device.router)
