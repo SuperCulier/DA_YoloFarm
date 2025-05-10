@@ -33,7 +33,7 @@ const CombinedWeatherCard = ({ data }) => {
             <FontAwesomeIcon icon={faLocationDot} />
             <span>Vườn nhà</span>
           </div>
-          {/* <div>Cập nhật lúc {data.timestamp}</div> */}
+          <div>Cập nhật lúc {data.timestamp}</div>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export default function Weather() {
     humidity: "--",
     soilMoisture: "--",
     lux: "--",
-    // timestamp: "--:--",
+    timestamp: "--:--",
     rawTimestamp: null,
   });
   const [chartData, setChartData] = useState([]);
@@ -92,6 +92,8 @@ export default function Weather() {
         fetchChartData(),
       ]);
 
+      const currentTime = new Date().toISOString();
+
       // Update weather data
       if (weatherResponse) {
         setWeatherData({
@@ -99,14 +101,12 @@ export default function Weather() {
           humidity: weatherResponse.humidity,
           soilMoisture: weatherResponse.soil_moisture,
           lux: weatherResponse.lux,
-          // timestamp: new Date(
-          //   weatherResponse.timestamp.replace(/Z$/, "")
-          // ).toLocaleTimeString("en-US", {
-          //   hour: "2-digit",
-          //   minute: "2-digit",
-          //   hour12: false,
-          // }),
-          rawTimestamp: weatherResponse.timestamp,
+          timestamp: new Date().toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
+          rawTimestamp: currentTime,
         });
       }
 
@@ -160,18 +160,28 @@ export default function Weather() {
 
           const endOfWeek = new Date(startOfWeek);
           endOfWeek.setDate(startOfWeek.getDate() + 6);
-          const endDateToUse = endOfWeek > currentDate ? currentDate : endOfWeek;
+          const endDateToUse =
+            endOfWeek > currentDate ? currentDate : endOfWeek;
           endDateStr = endDateToUse.toISOString().split("T")[0];
         } else if (selectedTab === "Tháng") {
-          const startOfMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+          const startOfMonth = new Date(
+            baseDate.getFullYear(),
+            baseDate.getMonth(),
+            1
+          );
           const earliestDate = new Date("2025-05-01");
           startDateStr =
             startOfMonth < earliestDate
               ? earliestDate.toISOString().split("T")[0]
               : startOfMonth.toISOString().split("T")[0];
 
-          const endOfMonth = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
-          const endDateToUse = endOfMonth > currentDate ? currentDate : endOfMonth;
+          const endOfMonth = new Date(
+            baseDate.getFullYear(),
+            baseDate.getMonth() + 1,
+            0
+          );
+          const endDateToUse =
+            endOfMonth > currentDate ? currentDate : endOfMonth;
           endDateStr = endDateToUse.toISOString().split("T")[0];
         }
 
@@ -198,7 +208,6 @@ export default function Weather() {
     }
   };
 
-
   useEffect(() => {
     fetchWeatherAndChartData();
     const intervalId = setInterval(() => {
@@ -224,7 +233,6 @@ export default function Weather() {
       <div className="p-6 sm:ml-64 bg-gray-50 dark:bg-gray-900 min-h-screen">
         {/* Header Section: Title, Weather Card, and Update Button */}
         <div className="max-w-4xl mx-auto">
-
           {/* Update Button */}
           <div className="flex justify-center mb-6">
             <button
@@ -282,7 +290,11 @@ export default function Weather() {
                 Không có dữ liệu để hiển thị
               </div>
             ) : (
-              <Chart weatherData={weatherData} selectedTab={selectedTab} chartData={chartData} />
+              <Chart
+                weatherData={weatherData}
+                selectedTab={selectedTab}
+                chartData={chartData}
+              />
             )}
           </div>
         </div>
