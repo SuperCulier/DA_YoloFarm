@@ -5,7 +5,7 @@ from src.controllers.environment_controller import (
     get_latest_environment_data,
     set_threshold,
     get_hourly_environment_data,
-    get_history_environment_data,
+    get_history_environment_data
 )
 from src.models.environment import EnvironmentData, en_threshold
 from datetime import datetime

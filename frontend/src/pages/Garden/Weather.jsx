@@ -10,7 +10,10 @@ import {
   faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import Chart from "../../components/Chart.jsx";
-import { fetchLatestWeatherData } from "../../apis/WeatherAPI.js";
+import {
+  fetchLatestWeatherData,
+  getWeatherHourly,
+} from "../../apis/WeatherAPI.js";
 
 // Combined Weather Card Component
 const CombinedWeatherCard = ({ data }) => {
@@ -18,7 +21,10 @@ const CombinedWeatherCard = ({ data }) => {
     <div className="max-w-md mx-auto p-6 bg-white border border-gray-200 rounded-xl shadow-md text-gray-800 dark:bg-gray-900 dark:text-white">
       <div className="flex justify-between items-center mb-4">
         <div className="text-5xl font-bold">
-          <FontAwesomeIcon icon={faTemperatureHalf} className="mr-2 text-red-500" />
+          <FontAwesomeIcon
+            icon={faTemperatureHalf}
+            className="mr-2 text-red-500"
+          />
           {data.temperature}°
         </div>
         <div className="text-right text-sm text-gray-500 dark:text-gray-300">
@@ -37,12 +43,18 @@ const CombinedWeatherCard = ({ data }) => {
           <div className="font-semibold">{data.humidity}%</div>
         </div>
         <div>
-          <FontAwesomeIcon icon={faSeedling} className="text-green-600 text-lg" />
+          <FontAwesomeIcon
+            icon={faSeedling}
+            className="text-green-600 text-lg"
+          />
           <div className="text-sm">Độ ẩm đất</div>
           <div className="font-semibold">{data.soilMoisture}%</div>
         </div>
         <div>
-          <FontAwesomeIcon icon={faLightbulb} className="text-yellow-500 text-lg" />
+          <FontAwesomeIcon
+            icon={faLightbulb}
+            className="text-yellow-500 text-lg"
+          />
           <div className="text-sm">Ánh sáng</div>
           <div className="font-semibold">{data.lux} lux</div>
         </div>
@@ -60,25 +72,44 @@ export default function Weather() {
     lux: "--",
     timestamp: "--:--",
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Define the refresh interval (3 minutes = 180000 milliseconds)
+  const REFRESH_INTERVAL = 150000;
 
   const updateWeatherData = async () => {
-    const data = await fetchLatestWeatherData();
-    if (data) {
-      setWeatherData({
-        temperature: data.temperature,
-        humidity: data.humidity,
-        soilMoisture: data.soilMoisture,
-        lux: data.lux,
-        timestamp: new Date(data.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      });
-    }    
+    setIsLoading(true);
+    try {
+      const data = await fetchLatestWeatherData();
+      if (data) {
+        setWeatherData({
+          temperature: data.temperature,
+          humidity: data.humidity,
+          soilMoisture: data.soilMoisture,
+          lux: data.lux,
+          timestamp: new Date(data.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          rawTimestamp: data.timestamp,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch weather data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     updateWeatherData();
+    // Set up automatic refresh interval (every 3 minutes)
+    const intervalId = setInterval(() => {
+      updateWeatherData();
+    }, REFRESH_INTERVAL);
+    
+    // Clean up the interval when component unmounts
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -125,11 +156,10 @@ export default function Weather() {
         {/* Chart */}
         <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-0 mt-8">
           <div className="w-full h-[400px]">
-            <Chart />
+            <Chart weatherData={weatherData} selectedTab={selectedTab} />
           </div>
         </div>
       </div>
     </>
   );
 }
-
